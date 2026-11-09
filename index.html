@@ -111,25 +111,24 @@
       </div>
     </div>
 
-    <!-- Active Nickname & User Bar -->
+    <!-- Active User & Account Bar -->
     <div class="bg-slate-900/80 px-3 py-1.5 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
       <div class="flex items-center gap-2">
         <span class="text-slate-400 font-mono text-[11px]">User:</span>
         <div class="flex items-center gap-1 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
           <span id="myStatusDot" class="w-2 h-2 rounded-full status-online"></span>
-          <span id="myNickDisplay" class="font-mono font-bold text-emerald-400 text-xs">You</span>
+          <span id="myNickDisplay" class="font-mono font-bold text-emerald-400 text-xs">Guest</span>
           <span id="myRoleBadge" class="hidden text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1 rounded font-mono font-bold">@OP</span>
         </div>
-        <button id="changeNickBtn" class="text-slate-400 hover:text-slate-200 text-[11px] px-1 hover:underline">
-          [change]
-        </button>
+        <span id="myRoomDisplay" class="text-slate-400 font-mono text-[11px] bg-slate-800/60 px-1.5 py-0.5 rounded border border-slate-800">Room 1</span>
       </div>
 
       <div class="flex items-center gap-2">
-        <span class="text-slate-500 font-mono text-[11px]">Room / Info:</span>
-        <span id="myRoomDisplay" class="text-slate-300 font-mono text-xs bg-slate-800 px-2 py-0.5 rounded border border-slate-700">House Member</span>
-        <button id="switchAdminBtn" class="text-amber-400/90 hover:text-amber-300 text-[11px] font-mono px-1.5 py-0.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded ml-1">
+        <button id="switchAdminBtn" class="text-slate-400 hover:text-amber-300 text-[11px] font-mono px-1.5 py-0.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded">
           Unlock Admin
+        </button>
+        <button id="signOutBtn" class="text-red-400 hover:text-red-300 text-[11px] font-mono px-2 py-0.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded flex items-center gap-1" title="Sign out of this session">
+          <i class="fa-solid fa-arrow-right-from-bracket text-[10px]"></i> Sign Out
         </button>
       </div>
     </div>
@@ -154,7 +153,7 @@
         <!-- Sidebar Content List -->
         <div class="flex-grow flex flex-col p-2 overflow-y-auto space-y-3">
           
-          <!-- 1. PEOPLE ONLINE WITH DROPDOWN -->
+          <!-- 1. PEOPLE ONLINE WITH DROPDOWN (ONLY REAL REGISTERED USERS) -->
           <div class="bg-slate-850/60 rounded border border-slate-800 p-1.5">
             <div id="onlineHeaderToggle" class="flex items-center justify-between cursor-pointer px-1 py-1 rounded hover:bg-slate-800 transition-colors">
               <div class="flex items-center gap-1.5">
@@ -315,7 +314,80 @@
 
   </div>
 
-    <!-- CHANGE ADMIN PIN MODAL -->
+  <!-- AUTHENTICATION / ACCOUNT SETUP MODAL (USERNAME & PASSWORD) -->
+  <div id="authModal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-xl border border-emerald-500/40 max-w-sm w-full p-5 font-mono text-xs shadow-2xl">
+      <div class="flex items-center gap-2 border-b border-slate-800 pb-3 mb-4">
+        <div class="w-6 h-6 rounded bg-emerald-600/30 text-emerald-400 flex items-center justify-center font-bold text-sm">#</div>
+        <div>
+          <h2 class="font-bold text-emerald-400 text-sm">Apartment 404 Access</h2>
+          <p class="text-[10px] text-slate-400">Sign in or create your roommate account</p>
+        </div>
+      </div>
+
+      <!-- Tab Switcher: Register / Login -->
+      <div class="flex border-b border-slate-800 mb-4 text-[11px]">
+        <button id="authTabRegister" class="flex-1 py-1.5 font-bold text-emerald-400 border-b-2 border-emerald-500 pb-1">
+          Create Account
+        </button>
+        <button id="authTabLogin" class="flex-1 py-1.5 font-medium text-slate-400 hover:text-slate-200 pb-1">
+          Sign In
+        </button>
+      </div>
+
+      <!-- 1. CREATE ACCOUNT FORM -->
+      <div id="registerForm" class="space-y-3">
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">Username:</label>
+          <input type="text" id="regUsernameInput" placeholder="e.g. Maya, Jordan, Alex" maxlength="16" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-100 text-xs focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">Password:</label>
+          <input type="password" id="regPasswordInput" placeholder="Enter password..." class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-100 text-xs focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">Confirm Password:</label>
+          <input type="password" id="regConfirmPasswordInput" placeholder="Confirm password..." class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-100 text-xs focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">Room / Description (Optional):</label>
+          <input type="text" id="regRoomInput" placeholder="e.g. Room 2, Upstairs" maxlength="24" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-100 text-xs focus:outline-none focus:border-emerald-500">
+        </div>
+        <div class="pt-2 border-t border-slate-800">
+          <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+            <input type="checkbox" id="regAdminCheckbox" class="rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-0">
+            <span class="text-[11px]">I am the House Admin (@OP)</span>
+          </label>
+        </div>
+        <div id="regPinContainer" class="hidden pt-1">
+          <label class="block text-amber-300 text-[11px] font-bold mb-1">Admin PIN (Default: 4040):</label>
+          <input type="password" id="regPinInput" placeholder="Enter 4-character PIN..." maxlength="4" class="w-full bg-slate-950 border border-amber-600/50 rounded p-1.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400">
+        </div>
+        <div id="regErrorMsg" class="hidden text-red-400 text-[10px] font-bold text-center"></div>
+        <button id="submitRegisterBtn" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-xs transition-colors shadow mt-2">
+          Create Account &amp; Enter
+        </button>
+      </div>
+
+      <!-- 2. SIGN IN FORM -->
+      <div id="loginForm" class="hidden space-y-3">
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">Username:</label>
+          <input type="text" id="loginUsernameInput" placeholder="Enter your username..." maxlength="16" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-100 text-xs focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">Password:</label>
+          <input type="password" id="loginPasswordInput" placeholder="Enter password..." class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-100 text-xs focus:outline-none focus:border-emerald-500">
+        </div>
+        <div id="loginErrorMsg" class="hidden text-red-400 text-[10px] font-bold text-center"></div>
+        <button id="submitLoginBtn" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-xs transition-colors shadow mt-2">
+          Sign In
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHANGE ADMIN PIN MODAL (CURRENT, NEW, CONFIRM, 4 CHARS MAX) -->
   <div id="changePinModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-lg border border-amber-500/50 max-w-xs w-full p-4 font-mono text-xs shadow-2xl">
       <div class="font-bold text-amber-300 text-sm mb-2 flex items-center gap-2">
@@ -347,49 +419,6 @@
     </div>
   </div>
 
-  <!-- ONBOARDING MODAL: WELCOME NEW ROOMMATE -->
-  <div id="onboardingModal" class="hidden fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 rounded-xl border border-emerald-500/40 max-w-sm w-full p-5 font-mono text-xs shadow-2xl">
-      <div class="font-bold text-emerald-400 text-base mb-1 flex items-center gap-2">
-        <i class="fa-solid fa-house-chimney text-emerald-400"></i>
-        <span>Welcome to Apartment 404</span>
-      </div>
-      <p class="text-slate-400 text-[11px] mb-4">
-        Set your profile for this browser session. Everything is saved locally to your device.
-      </p>
-
-      <div class="space-y-3">
-        <div>
-          <label class="block text-slate-300 font-bold mb-1">Your Nickname:</label>
-          <input type="text" id="onboardNickInput" placeholder="e.g. Maya, Jordan, Alex" maxlength="16" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-100 text-xs focus:outline-none focus:border-emerald-500">
-        </div>
-
-        <div>
-          <label class="block text-slate-300 font-bold mb-1">Room / Description (Optional):</label>
-          <input type="text" id="onboardRoomInput" placeholder="e.g. Room 2, Upstairs, Guest" maxlength="24" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-100 text-xs focus:outline-none focus:border-emerald-500">
-        </div>
-
-        <div class="pt-2 border-t border-slate-800">
-          <label class="flex items-center gap-2 cursor-pointer text-slate-300">
-            <input type="checkbox" id="onboardAdminCheckbox" class="rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-0">
-            <span class="text-[11px]">I am the House Admin (@OP)</span>
-          </label>
-        </div>
-
-        <div id="onboardPinContainer" class="hidden pt-1">
-          <label class="block text-amber-300 text-[11px] font-bold mb-1">Admin PIN (Default: 4040):</label>
-          <input type="password" id="onboardPinInput" placeholder="Enter PIN..." maxlength="8" class="w-full bg-slate-950 border border-amber-600/50 rounded p-1.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400">
-        </div>
-      </div>
-
-      <div class="mt-5">
-        <button id="saveOnboardBtn" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-xs transition-colors shadow">
-          Enter Apartment Messenger
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- ADMIN PIN AUTHENTICATION MODAL -->
   <div id="adminPinModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-lg border border-amber-500/50 max-w-xs w-full p-4 font-mono text-xs shadow-2xl">
@@ -400,7 +429,7 @@
       <div class="text-slate-400 text-[11px] mb-3">
         Enter the House Admin PIN to unlock operator tools (Default PIN: <strong>4040</strong>).
       </div>
-      <input type="password" id="adminPinInput" placeholder="Enter PIN..." maxlength="8" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200 text-center tracking-widest text-sm focus:outline-none focus:border-amber-500">
+      <input type="password" id="adminPinInput" placeholder="Enter 4-character PIN..." maxlength="4" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200 text-center tracking-widest text-sm focus:outline-none focus:border-amber-500">
       <div class="flex justify-end gap-2 mt-4 pt-2 border-t border-slate-800">
         <button id="cancelAdminPinBtn" class="px-3 py-1 text-slate-400 hover:text-slate-200">Cancel</button>
         <button id="submitAdminPinBtn" class="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded">Unlock OP</button>
@@ -446,7 +475,7 @@
         </div>
         <div>
           <label class="block text-slate-400 mb-1">Topic / Description:</label>
-          <input type="text" id="newChanTopicInput" placeholder="Roommate chat & plans" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200 focus:outline-none focus:border-emerald-500">
+          <input type="text" id="newChanTopicInput" placeholder="Roommate chat &amp; plans" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200 focus:outline-none focus:border-emerald-500">
         </div>
       </div>
       <div class="flex justify-end gap-2 mt-4 pt-2 border-t border-slate-800">
@@ -512,27 +541,6 @@
     </div>
   </div>
 
-  <!-- EDIT PROFILE MODAL -->
-  <div id="nickModal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 rounded-lg border border-slate-700 max-w-xs w-full p-4 font-mono text-xs">
-      <div class="font-bold text-slate-200 mb-2">Edit Your Profile</div>
-      <div class="space-y-2">
-        <div>
-          <label class="text-[10px] text-slate-400 block mb-0.5">Nickname:</label>
-          <input type="text" id="nickInputField" value="You" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200 focus:outline-none focus:border-emerald-500">
-        </div>
-        <div>
-          <label class="text-[10px] text-slate-400 block mb-0.5">Room / Note:</label>
-          <input type="text" id="roomInputField" value="Room 1" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200 focus:outline-none focus:border-emerald-500">
-        </div>
-      </div>
-      <div class="flex justify-end gap-2 mt-3 pt-2 border-t border-slate-800">
-        <button id="cancelNickBtn" class="px-2.5 py-1 text-slate-400 hover:text-slate-200">Cancel</button>
-        <button id="saveNickBtn" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded">Save</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-4 right-4 bg-slate-800 text-slate-200 border border-slate-700 px-3 py-1.5 rounded text-xs font-mono shadow-xl hidden z-50">
     <span id="toastMsg">Notification</span>
@@ -541,7 +549,7 @@
   <!-- Application Logic -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Audio Synthesizer (Clean, subtle single-tone chime)
+      // Audio Synthesizer (Clean single-tone chime)
       let audioCtx = null;
       let soundEnabled = true;
 
@@ -576,62 +584,62 @@
       }
 
       // App Storage Keys
-      const STORAGE_KEY_DATA = 'apt404_messenger_data_v2';
-      const STORAGE_KEY_USER = 'apt404_messenger_current_user_v2';
+      const STORAGE_KEY_DATA = 'apt404_messenger_data_v3';
+      const STORAGE_KEY_SESSION = 'apt404_active_session_v3';
+      const STORAGE_KEY_ACCOUNTS = 'apt404_registered_accounts_v3';
 
-      // Current User Session State (Populated on Onboarding or LocalStorage)
-      let currentUser = {
-        id: 'user_' + Math.random().toString(36).substring(2, 9),
-        nick: 'Host',
-        room: 'Room 1',
-        status: 'online',
-        isOp: true,
-        isBanned: false
-      };
+      // Registered Accounts Map (username -> { username, passwordHash, room, isOp, isBanned })
+      let registeredAccounts = {};
 
-      // Persistent App Data
+      // Current Session User
+      let currentUser = null;
+
+      // Channels & Messages (Completely clean slate, zero test dummy data)
       let channels = {};
       let chatHistories = {};
-      let knownUsers = {};
-      const adminPinCode = '4040';
+      let knownUsers = {}; // Live active users online
+      let adminPinCode = '4040';
 
-      // Load saved state
       function loadSavedState() {
         try {
+          const savedAccounts = localStorage.getItem(STORAGE_KEY_ACCOUNTS);
+          if (savedAccounts) {
+            registeredAccounts = JSON.parse(savedAccounts);
+          }
           const savedData = localStorage.getItem(STORAGE_KEY_DATA);
           if (savedData) {
             const parsed = JSON.parse(savedData);
             if (parsed.channels) channels = parsed.channels;
             if (parsed.chatHistories) chatHistories = parsed.chatHistories;
-            if (parsed.knownUsers) knownUsers = parsed.knownUsers;
             if (parsed.adminPinCode) adminPinCode = parsed.adminPinCode;
           }
-          const savedUser = localStorage.getItem(STORAGE_KEY_USER);
-          if (savedUser) {
-            currentUser = JSON.parse(savedUser);
+          const savedSession = localStorage.getItem(STORAGE_KEY_SESSION);
+          if (savedSession) {
+            currentUser = JSON.parse(savedSession);
           }
         } catch(e) {}
       }
 
       function persistState() {
         try {
+          localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(registeredAccounts));
           const payload = {
             channels,
             chatHistories,
-            knownUsers,
             adminPinCode
           };
           localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(payload));
-          localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(currentUser));
+          if (currentUser) {
+            localStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(currentUser));
+          } else {
+            localStorage.removeItem(STORAGE_KEY_SESSION);
+          }
         } catch(e) {}
       }
 
       loadSavedState();
 
-      // Ensure current user is in knownUsers
-      knownUsers[currentUser.id] = currentUser;
-
-      let currentLocation = 'lobby'; // 'lobby', channel id, or 'pm_<userId>'
+      let currentLocation = 'lobby';
       let selectedTargetUser = null;
       let editingChanId = null;
       const bc = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('apt404-irc-channel') : null;
@@ -649,6 +657,8 @@
       }
 
       function updateAdminUiState() {
+        if (!currentUser) return;
+
         const isAdmin = isCurrentAdmin();
         const adminBadge = document.getElementById('adminTitleBadge');
         const roleBadge = document.getElementById('myRoleBadge');
@@ -657,18 +667,18 @@
         const switchAdminBtn = document.getElementById('switchAdminBtn');
         const deleteActiveChanBtn = document.getElementById('deleteActiveChanBtn');
         const editActiveChanBtn = document.getElementById('editActiveChanBtn');
+        const lobbyConsole = document.getElementById('lobbyAdminConsole');
 
         document.getElementById('myNickDisplay').textContent = currentUser.nick;
-        document.getElementById('myRoomDisplay').textContent = currentUser.room || 'Member';
+        document.getElementById('myRoomDisplay').textContent = currentUser.room || 'Resident';
 
-        const lobbyConsole = document.getElementById('lobbyAdminConsole');
         if (isAdmin) {
           adminBadge.classList.remove('hidden');
           roleBadge.classList.remove('hidden');
           adminBtn.classList.remove('hidden');
           addChanBtn.classList.remove('hidden');
           switchAdminBtn.textContent = 'Admin (@OP)';
-          switchAdminBtn.className = 'text-amber-400 font-bold text-[11px] font-mono px-1.5 py-0.5 bg-amber-950/40 border border-amber-600/40 rounded ml-1';
+          switchAdminBtn.className = 'text-amber-400 font-bold text-[11px] font-mono px-1.5 py-0.5 bg-amber-950/40 border border-amber-600/40 rounded';
           if (currentLocation !== 'lobby' && !currentLocation.startsWith('pm_')) {
             deleteActiveChanBtn.classList.remove('hidden');
             editActiveChanBtn.classList.remove('hidden');
@@ -688,7 +698,7 @@
           adminBtn.classList.add('hidden');
           addChanBtn.classList.add('hidden');
           switchAdminBtn.textContent = 'Unlock Admin';
-          switchAdminBtn.className = 'text-slate-400 hover:text-amber-300 text-[11px] font-mono px-1.5 py-0.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded ml-1';
+          switchAdminBtn.className = 'text-slate-400 hover:text-amber-300 text-[11px] font-mono px-1.5 py-0.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded';
           deleteActiveChanBtn.classList.add('hidden');
           editActiveChanBtn.classList.add('hidden');
           if (lobbyConsole) lobbyConsole.classList.add('hidden');
@@ -758,10 +768,12 @@
         });
       }
 
-      // Render Online Roommates in Sidebar (Only Real Users)
+      // Render Online Roommates (Zero Test Users: Strictly Real Registered People)
       function renderOnlineUsersList() {
         const container = document.getElementById('peopleDropdownContainer');
         container.innerHTML = '';
+
+        if (!currentUser) return;
 
         const userKeys = Object.keys(knownUsers);
         const count = userKeys.length;
@@ -815,7 +827,7 @@
         if (container.children.length === 0) {
           const soloNotice = document.createElement('div');
           soloNotice.className = 'text-[11px] text-slate-500 font-mono p-1 text-center';
-          soloNotice.textContent = 'You are the only one online right now.';
+          soloNotice.textContent = 'You are the only roommate online.';
           container.appendChild(soloNotice);
         }
       }
@@ -985,6 +997,10 @@
         if (!u) return;
         u.isOp = !u.isOp;
 
+        if (registeredAccounts[u.nick]) {
+          registeredAccounts[u.nick].isOp = u.isOp;
+        }
+
         const actionText = u.isOp ? `promoted ${u.nick} to Operator (@OP)` : `demoted ${u.nick} to regular user`;
         if (currentLocation !== 'lobby') {
           appendMessageElement({ type: 'system', text: `* ${currentUser.nick} ${actionText}` });
@@ -1025,6 +1041,10 @@
         const u = knownUsers[userId];
         if (!u) return;
         u.isBanned = !u.isBanned;
+
+        if (registeredAccounts[u.nick]) {
+          registeredAccounts[u.nick].isBanned = u.isBanned;
+        }
 
         const banMsg = u.isBanned 
           ? `* ${u.nick} was BANNED from the apartment network by ${currentUser.nick}`
@@ -1124,7 +1144,7 @@
         data.id = msgId;
         data.likes = data.likes || 0;
         data.dislikes = data.dislikes || 0;
-        data.reactions = data.reactions || {}; // map of userId -> 'like' | 'dislike'
+        data.reactions = data.reactions || {};
 
         if (saveToHistory && currentLocation !== 'lobby') {
           if (!chatHistories[currentLocation]) {
@@ -1147,10 +1167,10 @@
         } else {
           const isOp = data.isOp || (data.nick === 'Admin');
           const prefix = isOp ? '@' : '';
-          const isMe = data.nick === currentUser.nick;
+          const isMe = currentUser && data.nick === currentUser.nick;
           const nickColor = isOp ? 'text-amber-400 font-bold' : (isMe ? 'text-emerald-400 font-bold' : 'text-sky-400 font-bold');
 
-          const userReaction = data.reactions[currentUser.id];
+          const userReaction = currentUser ? data.reactions[currentUser.id] : null;
           const likeActive = userReaction === 'like' ? 'reaction-active-like' : '';
           const dislikeActive = userReaction === 'dislike' ? 'reaction-active-dislike' : '';
 
@@ -1173,7 +1193,6 @@
             </div>
           `;
 
-          // Reaction click listener
           row.querySelectorAll('.reaction-pill').forEach(btn => {
             btn.addEventListener('click', () => {
               const reactType = btn.getAttribute('data-react');
@@ -1195,6 +1214,7 @@
 
       // Reaction Toggle Logic
       function toggleReaction(msgId, reactType) {
+        if (!currentUser) return;
         if (!chatHistories[currentLocation]) return;
         const msg = chatHistories[currentLocation].find(m => m.id === msgId);
         if (!msg) return;
@@ -1203,12 +1223,10 @@
         const prev = msg.reactions[currentUser.id];
 
         if (prev === reactType) {
-          // Untoggle
           delete msg.reactions[currentUser.id];
           if (reactType === 'like') msg.likes = Math.max(0, (msg.likes || 1) - 1);
           if (reactType === 'dislike') msg.dislikes = Math.max(0, (msg.dislikes || 1) - 1);
         } else {
-          // Switch or add
           if (prev === 'like') msg.likes = Math.max(0, (msg.likes || 1) - 1);
           if (prev === 'dislike') msg.dislikes = Math.max(0, (msg.dislikes || 1) - 1);
 
@@ -1236,6 +1254,11 @@
 
       // Send Message / Command Handler
       function handleSendMessage() {
+        if (!currentUser) {
+          showToast('Please sign in first');
+          return;
+        }
+
         if (currentUser.isBanned) {
           showToast('You are banned from sending messages.');
           return;
@@ -1300,6 +1323,11 @@
           const oldNick = currentUser.nick;
           const newNick = parts[1];
           currentUser.nick = newNick;
+          if (registeredAccounts[oldNick]) {
+            registeredAccounts[newNick] = registeredAccounts[oldNick];
+            registeredAccounts[newNick].username = newNick;
+            delete registeredAccounts[oldNick];
+          }
           knownUsers[currentUser.id].nick = newNick;
           persistState();
           document.getElementById('myNickDisplay').textContent = newNick;
@@ -1336,60 +1364,17 @@
           } else {
             appendMessageElement({ type: 'system', text: `* Current topic for ${channels[currentLocation].name}: ${channels[currentLocation].topic}` });
           }
-        } else if (c === '/op' && parts[1]) {
-          const targetKey = Object.keys(knownUsers).find(k => knownUsers[k].nick.toLowerCase() === parts[1].toLowerCase());
-          if (targetKey) {
-            knownUsers[targetKey].isOp = true;
-            persistState();
-            appendMessageElement({ type: 'system', text: `* ${currentUser.nick} promoted ${knownUsers[targetKey].nick} to Operator (@OP)` });
-            renderOnlineUsersList();
-          } else {
-            appendMessageElement({ type: 'system', text: `* User ${parts[1]} not found` });
-          }
-        } else if (c === '/deop' && parts[1]) {
-          const targetKey = Object.keys(knownUsers).find(k => knownUsers[k].nick.toLowerCase() === parts[1].toLowerCase());
-          if (targetKey) {
-            knownUsers[targetKey].isOp = false;
-            persistState();
-            appendMessageElement({ type: 'system', text: `* ${currentUser.nick} demoted ${knownUsers[targetKey].nick} from Operator` });
-            renderOnlineUsersList();
-          } else {
-            appendMessageElement({ type: 'system', text: `* User ${parts[1]} not found` });
-          }
-        } else if (c === '/kick' && parts[1]) {
-          const targetKey = Object.keys(knownUsers).find(k => knownUsers[k].nick.toLowerCase() === parts[1].toLowerCase());
-          if (targetKey) {
-            const reason = parts.slice(2).join(' ') || 'Kicked by Operator';
-            kickUser(targetKey, reason);
-          } else {
-            appendMessageElement({ type: 'system', text: `* User ${parts[1]} not found` });
-          }
-        } else if (c === '/ban' && parts[1]) {
-          const targetKey = Object.keys(knownUsers).find(k => knownUsers[k].nick.toLowerCase() === parts[1].toLowerCase());
-          if (targetKey) {
-            knownUsers[targetKey].isBanned = true;
-            persistState();
-            appendMessageElement({ type: 'system', text: `* ${knownUsers[targetKey].nick} was BANNED by ${currentUser.nick}` });
-            renderOnlineUsersList();
-          } else {
-            appendMessageElement({ type: 'system', text: `* User ${parts[1]} not found` });
-          }
-        } else if (c === '/unban' && parts[1]) {
-          const targetKey = Object.keys(knownUsers).find(k => knownUsers[k].nick.toLowerCase() === parts[1].toLowerCase());
-          if (targetKey) {
-            knownUsers[targetKey].isBanned = false;
-            persistState();
-            appendMessageElement({ type: 'system', text: `* ${knownUsers[targetKey].nick} was UNBANNED by ${currentUser.nick}` });
-            renderOnlineUsersList();
-          } else {
-            appendMessageElement({ type: 'system', text: `* User ${parts[1]} not found` });
-          }
         } else if (c === '/pin' && parts[1]) {
           if (!isAdmin) {
             appendMessageElement({ type: 'system', text: '* Error: Operator permissions (+o) required to change Admin PIN' });
             return;
           }
-          adminPinCode = parts[1].trim();
+          const p = parts[1].trim();
+          if (p.length > 4) {
+            appendMessageElement({ type: 'system', text: '* Error: Admin PIN must be 4 characters max' });
+            return;
+          }
+          adminPinCode = p;
           persistState();
           appendMessageElement({ type: 'system', text: `* Admin PIN updated successfully to: ${adminPinCode}` });
           showToast(`Admin PIN updated to ${adminPinCode}`);
@@ -1411,7 +1396,7 @@
             appendMessageElement({ type: 'system', text: '* /kick <nick> [reason]    - Eject roommate from channel' });
             appendMessageElement({ type: 'system', text: '* /ban <nick>              - Network ban user from chatting' });
             appendMessageElement({ type: 'system', text: '* /unban <nick>            - Lift ban on user' });
-            appendMessageElement({ type: 'system', text: '* /pin <new_pin>           - Update House Admin PIN' });
+            appendMessageElement({ type: 'system', text: '* /pin <new_pin>           - Update House Admin PIN (4 chars max)' });
           }
           appendMessageElement({ type: 'system', text: '===========================================================' });
         } else {
@@ -1455,46 +1440,15 @@
         toggleDropdown();
       });
 
-      // Profile edit modal
-      const nickModal = document.getElementById('nickModal');
-      const nickInputField = document.getElementById('nickInputField');
-      const roomInputField = document.getElementById('roomInputField');
-
-      document.getElementById('changeNickBtn').addEventListener('click', () => {
-        nickInputField.value = currentUser.nick;
-        roomInputField.value = currentUser.room || '';
-        nickModal.classList.remove('hidden');
-        nickInputField.focus();
-      });
-
-      document.getElementById('cancelNickBtn').addEventListener('click', () => {
-        nickModal.classList.add('hidden');
-      });
-
-      document.getElementById('saveNickBtn').addEventListener('click', () => {
-        const val = nickInputField.value.trim();
-        const rm = roomInputField.value.trim();
-        if (val) {
-          const old = currentUser.nick;
-          currentUser.nick = val;
-          currentUser.room = rm;
-          knownUsers[currentUser.id].nick = val;
-          knownUsers[currentUser.id].room = rm;
-          persistState();
-
-          updateAdminUiState();
-          if (currentLocation !== 'lobby') {
-            appendMessageElement({ type: 'system', text: `* ${old} is now known as ${val}` });
-          }
-          showToast(`Profile updated: ${val}`);
-
-          if (bc) {
-            try {
-              bc.postMessage({ type: 'user_profile_update', user: currentUser });
-            } catch(e) {}
-          }
+      // Sign Out Button
+      document.getElementById('signOutBtn').addEventListener('click', () => {
+        if (currentUser && knownUsers[currentUser.id]) {
+          delete knownUsers[currentUser.id];
         }
-        nickModal.classList.add('hidden');
+        currentUser = null;
+        persistState();
+        showToast('Signed out of Apartment 404');
+        showAuthModal('login');
       });
 
       // Admin PIN unlock button in user bar
@@ -1503,6 +1457,7 @@
       const switchAdminBtn = document.getElementById('switchAdminBtn');
 
       switchAdminBtn.addEventListener('click', () => {
+        if (!currentUser) return;
         if (currentUser.isOp) {
           showToast('You already have House Admin (@OP) access');
           return;
@@ -1521,6 +1476,9 @@
         if (val === adminPinCode) {
           currentUser.isOp = true;
           knownUsers[currentUser.id].isOp = true;
+          if (registeredAccounts[currentUser.nick]) {
+            registeredAccounts[currentUser.nick].isOp = true;
+          }
           persistState();
           adminPinModal.classList.add('hidden');
           updateAdminUiState();
@@ -1544,6 +1502,77 @@
         if (e.key === 'Enter') {
           document.getElementById('submitAdminPinBtn').click();
         }
+      });
+
+      // Change Admin PIN modal controls (Current PIN, New PIN, Confirm New PIN, 4 chars max)
+      const changePinModal = document.getElementById('changePinModal');
+      const currentAdminPinInput = document.getElementById('currentAdminPinInput');
+      const newAdminPinInput = document.getElementById('newAdminPinInput');
+      const confirmAdminPinInput = document.getElementById('confirmAdminPinInput');
+      const pinErrorMsg = document.getElementById('pinErrorMsg');
+
+      function openChangePinModal() {
+        if (!isCurrentAdmin()) {
+          showToast('Only Admins can change the PIN');
+          return;
+        }
+        currentAdminPinInput.value = '';
+        newAdminPinInput.value = '';
+        confirmAdminPinInput.value = '';
+        pinErrorMsg.classList.add('hidden');
+        pinErrorMsg.textContent = '';
+        changePinModal.classList.remove('hidden');
+        currentAdminPinInput.focus();
+      }
+
+      document.getElementById('cancelChangePinBtn').addEventListener('click', () => {
+        changePinModal.classList.add('hidden');
+      });
+
+      document.getElementById('saveChangePinBtn').addEventListener('click', () => {
+        const currentVal = currentAdminPinInput.value.trim();
+        const newVal = newAdminPinInput.value.trim();
+        const confirmVal = confirmAdminPinInput.value.trim();
+
+        if (currentVal !== adminPinCode) {
+          pinErrorMsg.textContent = 'Current PIN is incorrect.';
+          pinErrorMsg.classList.remove('hidden');
+          showToast('Current PIN is incorrect');
+          currentAdminPinInput.focus();
+          return;
+        }
+
+        if (!newVal || newVal.length === 0 || newVal.length > 4) {
+          pinErrorMsg.textContent = 'New PIN must be 1 to 4 characters max.';
+          pinErrorMsg.classList.remove('hidden');
+          showToast('New PIN must be 1 to 4 characters max');
+          newAdminPinInput.focus();
+          return;
+        }
+
+        if (newVal !== confirmVal) {
+          pinErrorMsg.textContent = 'New PIN and Confirm PIN do not match.';
+          pinErrorMsg.classList.remove('hidden');
+          showToast('New PIN and Confirm PIN do not match');
+          confirmAdminPinInput.focus();
+          return;
+        }
+
+        adminPinCode = newVal;
+        persistState();
+        changePinModal.classList.add('hidden');
+        showToast(`Admin PIN updated to ${newVal}`);
+        if (currentLocation !== 'lobby') {
+          appendMessageElement({ type: 'system', text: `* Admin PIN was successfully updated by ${currentUser.nick}` });
+        }
+      });
+
+      [currentAdminPinInput, newAdminPinInput, confirmAdminPinInput].forEach(inp => {
+        inp.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            document.getElementById('saveChangePinBtn').click();
+          }
+        });
       });
 
       // Channel Modals
@@ -1582,6 +1611,18 @@
         }
       });
 
+      // Lobby Admin Console listeners
+      document.getElementById('consoleAddChanBtn').addEventListener('click', openCreateChannelModal);
+      document.getElementById('consoleChangePinBtn').addEventListener('click', openChangePinModal);
+      document.getElementById('consoleModBtn').addEventListener('click', () => {
+        const otherKeys = Object.keys(knownUsers).filter(k => k !== currentUser.id);
+        if (otherKeys.length > 0) {
+          openAdminUserModal(otherKeys[0]);
+        } else {
+          showToast('No other roommates connected right now');
+        }
+      });
+
       // Admin User Modal buttons
       document.getElementById('closeAdminUserModalBtn').addEventListener('click', () => {
         document.getElementById('adminUserModal').classList.add('hidden');
@@ -1594,7 +1635,7 @@
         if (otherKeys.length > 0) {
           openAdminUserModal(otherKeys[0]);
         } else {
-          showToast('No other roommates connected yet');
+          showToast('No other roommates connected right now');
         }
       });
 
@@ -1640,54 +1681,138 @@
       document.getElementById('maximizeBtn').addEventListener('click', () => showToast('Maximized'));
       document.getElementById('closeBtn').addEventListener('click', () => showToast('Client active'));
 
-      // New User Onboarding Modal Logic
-      const onboardingModal = document.getElementById('onboardingModal');
-      const onboardNickInput = document.getElementById('onboardNickInput');
-      const onboardRoomInput = document.getElementById('onboardRoomInput');
-      const onboardAdminCheckbox = document.getElementById('onboardAdminCheckbox');
-      const onboardPinContainer = document.getElementById('onboardPinContainer');
-      const onboardPinInput = document.getElementById('onboardPinInput');
-      const saveOnboardBtn = document.getElementById('saveOnboardBtn');
+      // ==========================================
+      // AUTHENTICATION MODAL (REGISTER / LOGIN)
+      // ==========================================
+      const authModal = document.getElementById('authModal');
+      const authTabRegister = document.getElementById('authTabRegister');
+      const authTabLogin = document.getElementById('authTabLogin');
+      const registerForm = document.getElementById('registerForm');
+      const loginForm = document.getElementById('loginForm');
+      const regUsernameInput = document.getElementById('regUsernameInput');
+      const regPasswordInput = document.getElementById('regPasswordInput');
+      const regConfirmPasswordInput = document.getElementById('regConfirmPasswordInput');
+      const regRoomInput = document.getElementById('regRoomInput');
+      const regAdminCheckbox = document.getElementById('regAdminCheckbox');
+      const regPinContainer = document.getElementById('regPinContainer');
+      const regPinInput = document.getElementById('regPinInput');
+      const regErrorMsg = document.getElementById('regErrorMsg');
+      const submitRegisterBtn = document.getElementById('submitRegisterBtn');
 
-      onboardAdminCheckbox.addEventListener('change', () => {
-        if (onboardAdminCheckbox.checked) {
-          onboardPinContainer.classList.remove('hidden');
-          onboardPinInput.focus();
+      const loginUsernameInput = document.getElementById('loginUsernameInput');
+      const loginPasswordInput = document.getElementById('loginPasswordInput');
+      const loginErrorMsg = document.getElementById('loginErrorMsg');
+      const submitLoginBtn = document.getElementById('submitLoginBtn');
+
+      function showAuthModal(tab = 'register') {
+        authModal.classList.remove('hidden');
+        if (tab === 'login') {
+          switchAuthTab('login');
         } else {
-          onboardPinContainer.classList.add('hidden');
-        }
-      });
-
-      function checkFirstTimeUser() {
-        const saved = localStorage.getItem(STORAGE_KEY_USER);
-        if (!saved) {
-          onboardingModal.classList.remove('hidden');
-          onboardNickInput.focus();
+          switchAuthTab('register');
         }
       }
 
-      saveOnboardBtn.addEventListener('click', () => {
-        const nick = onboardNickInput.value.trim() || 'Roommate';
-        const room = onboardRoomInput.value.trim() || 'Resident';
-        let isOp = false;
+      function switchAuthTab(tab) {
+        if (tab === 'register') {
+          authTabRegister.className = 'flex-1 py-1.5 font-bold text-emerald-400 border-b-2 border-emerald-500 pb-1';
+          authTabLogin.className = 'flex-1 py-1.5 font-medium text-slate-400 hover:text-slate-200 pb-1';
+          registerForm.classList.remove('hidden');
+          loginForm.classList.add('hidden');
+          regUsernameInput.focus();
+        } else {
+          authTabLogin.className = 'flex-1 py-1.5 font-bold text-emerald-400 border-b-2 border-emerald-500 pb-1';
+          authTabRegister.className = 'flex-1 py-1.5 font-medium text-slate-400 hover:text-slate-200 pb-1';
+          loginForm.classList.remove('hidden');
+          registerForm.classList.add('hidden');
+          loginUsernameInput.focus();
+        }
+        regErrorMsg.classList.add('hidden');
+        loginErrorMsg.classList.add('hidden');
+      }
 
-        if (onboardAdminCheckbox.checked) {
-          if (onboardPinInput.value.trim() === adminPinCode) {
+      authTabRegister.addEventListener('click', () => switchAuthTab('register'));
+      authTabLogin.addEventListener('click', () => switchAuthTab('login'));
+
+      regAdminCheckbox.addEventListener('change', () => {
+        if (regAdminCheckbox.checked) {
+          regPinContainer.classList.remove('hidden');
+          regPinInput.focus();
+        } else {
+          regPinContainer.classList.add('hidden');
+        }
+      });
+
+      // Submit Registration
+      submitRegisterBtn.addEventListener('click', () => {
+        const username = regUsernameInput.value.trim();
+        const password = regPasswordInput.value;
+        const confirm = regConfirmPasswordInput.value;
+        const room = regRoomInput.value.trim() || 'Resident';
+
+        if (!username || username.length < 2) {
+          regErrorMsg.textContent = 'Username must be at least 2 characters.';
+          regErrorMsg.classList.remove('hidden');
+          return;
+        }
+
+        if (registeredAccounts[username.toLowerCase()]) {
+          regErrorMsg.textContent = 'An account with this username already exists. Please sign in.';
+          regErrorMsg.classList.remove('hidden');
+          return;
+        }
+
+        if (!password || password.length < 3) {
+          regErrorMsg.textContent = 'Password must be at least 3 characters.';
+          regErrorMsg.classList.remove('hidden');
+          return;
+        }
+
+        if (password !== confirm) {
+          regErrorMsg.textContent = 'Passwords do not match.';
+          regErrorMsg.classList.remove('hidden');
+          return;
+        }
+
+        let isOp = false;
+        if (regAdminCheckbox.checked) {
+          if (regPinInput.value.trim() === adminPinCode) {
             isOp = true;
           } else {
-            showToast('Incorrect Admin PIN. Joining as regular member.');
+            regErrorMsg.textContent = 'Incorrect Admin PIN. Uncheck or enter correct PIN.';
+            regErrorMsg.classList.remove('hidden');
+            return;
           }
         }
 
-        currentUser.nick = nick;
-        currentUser.room = room;
-        currentUser.isOp = isOp;
+        // Save Account
+        const newAccount = {
+          id: 'user_' + Math.random().toString(36).substring(2, 9),
+          username: username,
+          password: password,
+          room: room,
+          isOp: isOp,
+          isBanned: false
+        };
+
+        registeredAccounts[username.toLowerCase()] = newAccount;
+
+        currentUser = {
+          id: newAccount.id,
+          nick: newAccount.username,
+          room: newAccount.room,
+          status: 'online',
+          isOp: newAccount.isOp,
+          isBanned: newAccount.isBanned
+        };
+
         knownUsers[currentUser.id] = currentUser;
         persistState();
 
-        onboardingModal.classList.add('hidden');
+        authModal.classList.add('hidden');
         updateAdminUiState();
-        showToast(`Welcome to Apartment 404, ${nick}!`);
+        showLobby();
+        showToast(`Welcome to Apartment 404, ${username}!`);
 
         if (bc) {
           try {
@@ -1696,11 +1821,67 @@
         }
       });
 
-      // Announce presence on network
+      // Submit Login
+      submitLoginBtn.addEventListener('click', () => {
+        const username = loginUsernameInput.value.trim();
+        const password = loginPasswordInput.value;
+
+        if (!username || !password) {
+          loginErrorMsg.textContent = 'Please enter both username and password.';
+          loginErrorMsg.classList.remove('hidden');
+          return;
+        }
+
+        const account = registeredAccounts[username.toLowerCase()];
+        if (!account || account.password !== password) {
+          loginErrorMsg.textContent = 'Invalid username or password.';
+          loginErrorMsg.classList.remove('hidden');
+          return;
+        }
+
+        currentUser = {
+          id: account.id,
+          nick: account.username,
+          room: account.room,
+          status: 'online',
+          isOp: account.isOp,
+          isBanned: account.isBanned
+        };
+
+        knownUsers[currentUser.id] = currentUser;
+        persistState();
+
+        authModal.classList.add('hidden');
+        updateAdminUiState();
+        showLobby();
+        showToast(`Welcome back, ${currentUser.nick}!`);
+
+        if (bc) {
+          try {
+            bc.postMessage({ type: 'user_join', user: currentUser });
+          } catch(e) {}
+        }
+      });
+
+      [regUsernameInput, regPasswordInput, regConfirmPasswordInput, regRoomInput, regPinInput].forEach(inp => {
+        inp.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') submitRegisterBtn.click();
+        });
+      });
+
+      [loginUsernameInput, loginPasswordInput].forEach(inp => {
+        inp.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') submitLoginBtn.click();
+        });
+      });
+
+      // Network Broadcast & Presence Listener
       if (bc) {
-        try {
-          bc.postMessage({ type: 'user_ping', user: currentUser });
-        } catch(e) {}
+        if (currentUser) {
+          try {
+            bc.postMessage({ type: 'user_ping', user: currentUser });
+          } catch(e) {}
+        }
 
         bc.onmessage = (e) => {
           const data = e.data;
@@ -1763,29 +1944,20 @@
             if (currentLocation === data.id) showLobby();
             renderChannelsSidebar();
           } else if (data.type === 'user_join' || data.type === 'user_ping') {
-            if (data.user && data.user.id !== currentUser.id) {
+            if (data.user && currentUser && data.user.id !== currentUser.id) {
               knownUsers[data.user.id] = data.user;
-              persistState();
               renderOnlineUsersList();
-              // Reply with own presence if this was a new join
               if (data.type === 'user_join' && bc) {
                 try {
                   bc.postMessage({ type: 'user_ping', user: currentUser });
                 } catch(err) {}
               }
             }
-          } else if (data.type === 'user_profile_update') {
-            if (data.user) {
-              knownUsers[data.user.id] = data.user;
-              persistState();
-              renderOnlineUsersList();
-            }
           } else if (data.type === 'op_change') {
             if (knownUsers[data.userId]) {
               knownUsers[data.userId].isOp = data.isOp;
-              persistState();
             }
-            if (data.userId === currentUser.id) {
+            if (currentUser && data.userId === currentUser.id) {
               currentUser.isOp = data.isOp;
               persistState();
               updateAdminUiState();
@@ -1794,16 +1966,15 @@
           } else if (data.type === 'ban_change') {
             if (knownUsers[data.userId]) {
               knownUsers[data.userId].isBanned = data.isBanned;
-              persistState();
             }
-            if (data.userId === currentUser.id) {
+            if (currentUser && data.userId === currentUser.id) {
               currentUser.isBanned = data.isBanned;
               persistState();
               showToast('Your account was banned by the House Admin.');
             }
             renderOnlineUsersList();
           } else if (data.type === 'kick') {
-            if (data.userId === currentUser.id) {
+            if (currentUser && data.userId === currentUser.id) {
               showLobby();
               showToast(`You were kicked from the room by ${data.admin} (${data.reason})`);
             }
@@ -1811,10 +1982,14 @@
         };
       }
 
-      // Initial render & check
-      updateAdminUiState();
-      showLobby();
-      checkFirstTimeUser();
+      // Check Session on Start
+      if (!currentUser) {
+        showAuthModal('register');
+      } else {
+        knownUsers[currentUser.id] = currentUser;
+        updateAdminUiState();
+        showLobby();
+      }
     });
   </script>
 </body>
