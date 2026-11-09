@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#020617">
+  <meta name="application-name" content="Apt404">
   <title>Apt404 Roommate Messenger (IRC Edition)</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -46,6 +51,24 @@
     .status-away { background-color: #f59e0b; }
     .status-busy { background-color: #ef4444; }
     .status-banned { background-color: #7f1d1d; }
+
+    /* Reaction pill styles */
+    .reaction-pill {
+      transition: all 0.15s ease;
+    }
+    .reaction-pill:hover {
+      background-color: #334155;
+    }
+    .reaction-active-like {
+      background-color: rgba(34, 197, 94, 0.2) !important;
+      border-color: rgba(34, 197, 94, 0.5) !important;
+      color: #4ade80 !important;
+    }
+    .reaction-active-dislike {
+      background-color: rgba(239, 68, 68, 0.2) !important;
+      border-color: rgba(239, 68, 68, 0.5) !important;
+      color: #f87171 !important;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between p-2 sm:p-4">
@@ -62,7 +85,7 @@
         <span class="font-bold text-slate-200 tracking-tight flex items-center gap-1.5">
           <span>Apt404 Messenger</span>
           <span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.2 rounded border border-slate-700 font-mono">LAN ircd</span>
-          <span id="adminTitleBadge" class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded font-mono font-bold">
+          <span id="adminTitleBadge" class="hidden text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded font-mono font-bold">
             <i class="fa-solid fa-shield-halved text-[9px] mr-1"></i>ADMIN [OP]
           </span>
         </span>
@@ -70,16 +93,11 @@
 
       <!-- Quick Controls -->
       <div class="flex items-center gap-3">
-        <button id="adminPanelTopBtn" class="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/40 text-amber-300 text-[11px] font-mono transition-colors">
+        <button id="adminPanelTopBtn" class="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/40 text-amber-300 text-[11px] font-mono transition-colors">
           <i class="fa-solid fa-gear text-[10px]"></i>
           <span>Admin Tools</span>
         </button>
 
-        <label class="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-400 cursor-pointer">
-          <input type="checkbox" id="botRepliesToggle" checked class="rounded border-slate-700 bg-slate-800 text-emerald-500 focus:ring-0 w-3.5 h-3.5">
-          <span>Roommate Sim</span>
-        </label>
-        
         <button id="soundToggleBtn" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 flex items-center gap-1 text-[11px] transition-colors">
           <i id="soundIcon" class="fa-solid fa-volume-high text-emerald-400"></i>
           <span id="soundLabel">Sound ON</span>
@@ -93,14 +111,14 @@
       </div>
     </div>
 
-    <!-- Active Nickname & Persona Bar -->
+    <!-- Active Nickname & User Bar -->
     <div class="bg-slate-900/80 px-3 py-1.5 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
       <div class="flex items-center gap-2">
-        <span class="text-slate-400 font-mono text-[11px]">Nick:</span>
+        <span class="text-slate-400 font-mono text-[11px]">User:</span>
         <div class="flex items-center gap-1 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
           <span id="myStatusDot" class="w-2 h-2 rounded-full status-online"></span>
-          <span id="myNickDisplay" class="font-mono font-bold text-emerald-400 text-xs">Admin</span>
-          <span id="myRoleBadge" class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1 rounded font-mono font-bold">@OP</span>
+          <span id="myNickDisplay" class="font-mono font-bold text-emerald-400 text-xs">You</span>
+          <span id="myRoleBadge" class="hidden text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1 rounded font-mono font-bold">@OP</span>
         </div>
         <button id="changeNickBtn" class="text-slate-400 hover:text-slate-200 text-[11px] px-1 hover:underline">
           [change]
@@ -108,21 +126,18 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <span class="text-slate-400 text-[11px]">Roommate Persona:</span>
-        <select id="personaSelect" class="bg-slate-800 border border-slate-700 text-slate-200 rounded px-2 py-0.5 text-xs font-mono focus:outline-none focus:border-slate-500 cursor-pointer">
-          <option value="admin" selected>★ Admin (House Lead / OP)</option>
-          <option value="alex">Alex (Room 1)</option>
-          <option value="sam">Sam (Room 2)</option>
-          <option value="jordan">Jordan (Room 3)</option>
-          <option value="taylor">Taylor (Room 4)</option>
-        </select>
+        <span class="text-slate-500 font-mono text-[11px]">Room / Info:</span>
+        <span id="myRoomDisplay" class="text-slate-300 font-mono text-xs bg-slate-800 px-2 py-0.5 rounded border border-slate-700">House Member</span>
+        <button id="switchAdminBtn" class="text-amber-400/90 hover:text-amber-300 text-[11px] font-mono px-1.5 py-0.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded ml-1">
+          Unlock Admin
+        </button>
       </div>
     </div>
 
     <!-- Main Workspace (Dual Pane: Sidebar on Left, Right Pane on Right) -->
     <div class="flex-grow flex flex-col md:flex-row bg-slate-950 min-h-[460px] overflow-hidden">
 
-      <!-- LEFT SIDEBAR: Online Users with Dropdown + Channels Management -->
+      <!-- LEFT SIDEBAR: Online Users + Channels Management -->
       <div id="sidebarPane" class="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex flex-col flex-shrink-0 select-none">
         
         <!-- Navigation to Main Lobby (Blank) -->
@@ -145,7 +160,7 @@
               <div class="flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                 <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider font-mono">Online</span>
-                <span id="onlineCountBadge" class="text-[10px] text-slate-400 font-mono">(4)</span>
+                <span id="onlineCountBadge" class="text-[10px] text-slate-400 font-mono">(1)</span>
               </div>
               <button id="togglePeopleDropdownBtn" class="text-slate-400 hover:text-slate-200 text-xs px-1" title="Toggle List">
                 <i id="peopleDropdownIcon" class="fa-solid fa-chevron-down text-[10px]"></i>
@@ -155,13 +170,13 @@
             <!-- Online Users List -->
             <div id="peopleDropdownContainer" class="mt-1 space-y-0.5">
               <div class="user-row px-2 py-1.5 hover:bg-slate-800 rounded cursor-pointer flex items-center justify-between text-xs">
-                <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full status-online"></span><span class="font-mono text-slate-200">Sam</span></div>
+                <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full status-online"></span><span class="font-mono text-slate-200">Roommate</span></div>
                 <button class="pm-btn text-[10px] bg-slate-750 text-slate-400 px-1.5 py-0.5 rounded font-mono">PM</button>
               </div>
             </div>
           </div>
 
-          <!-- 2. CHANNELS LIST (CLEAN SLATE: CREATE, EDIT, AND DELETE) -->
+          <!-- 2. CHANNELS LIST (ADD, EDIT, AND DELETE) -->
           <div>
             <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1 mb-1 font-mono flex items-center justify-between">
               <span>Channels</span>
@@ -194,10 +209,50 @@
       <div id="mainRightPane" class="flex-grow flex flex-col bg-slate-950 overflow-hidden relative">
 
         <!-- ============================================== -->
-        <!-- 1. INITIAL LOAD LOBBY VIEW (COMPLETELY BLANK)   -->
+        <!-- 1. INITIAL LOAD LOBBY VIEW (BLANK OR ADMIN CONSOLE) -->
         <!-- ============================================== -->
-        <div id="lobbySplashView" class="flex-grow bg-slate-950 flex flex-col justify-center items-center p-6 select-none">
-          <!-- Entirely blank as requested -->
+        <div id="lobbySplashView" class="flex-grow bg-slate-950 flex flex-col justify-center items-end p-6 select-none relative">
+          <!-- If non-admin: completely blank slate -->
+          
+          <!-- If admin: sleek admin console on the right -->
+          <div id="lobbyAdminConsole" class="hidden max-w-xs w-full bg-slate-900 border border-amber-500/40 rounded-xl p-4 font-mono text-xs shadow-2xl space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="font-bold text-amber-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-shield-halved text-amber-400"></i>
+                <span>Admin Console</span>
+              </span>
+              <span class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1 rounded font-bold">@OP Active</span>
+            </div>
+
+            <!-- Stats -->
+            <div class="space-y-1 text-slate-400 text-[11px]">
+              <div class="flex justify-between">
+                <span>Active Channels:</span>
+                <span id="consoleChanCount" class="font-bold text-slate-200">0</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Roommates Online:</span>
+                <span id="consoleUserCount" class="font-bold text-slate-200">1</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Admin PIN:</span>
+                <span class="font-bold text-amber-400">••••</span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="pt-2 border-t border-slate-800 space-y-1.5">
+              <button id="consoleAddChanBtn" class="w-full py-1.5 bg-emerald-600/30 hover:bg-emerald-600/40 border border-emerald-500/40 text-emerald-300 rounded font-bold text-[11px] flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-plus text-[10px]"></i> Create Channel
+              </button>
+              <button id="consoleChangePinBtn" class="w-full py-1.5 bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/40 text-amber-300 rounded font-bold text-[11px] flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-key text-[10px]"></i> Change Admin PIN
+              </button>
+              <button id="consoleModBtn" class="w-full py-1.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 rounded text-[11px] flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-users-gear text-[10px]"></i> Roommate Moderation
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- ============================================== -->
@@ -229,14 +284,14 @@
             </div>
           </div>
 
-          <!-- Message Log (Clean IRC Log) -->
-          <div id="chatMessagesLog" class="flex-grow p-3 overflow-y-auto space-y-1 bg-slate-950 font-mono-irc text-xs text-slate-300">
+          <!-- Message Log (Clean IRC Log with Reaction Pills) -->
+          <div id="chatMessagesLog" class="flex-grow p-3 overflow-y-auto space-y-1.5 bg-slate-950 font-mono-irc text-xs text-slate-300">
             <!-- Messages rendered dynamically -->
           </div>
 
           <!-- Typing indicator -->
           <div id="typingIndicator" class="hidden px-3 py-0.5 text-[10px] font-mono text-slate-500 bg-slate-900/60 border-t border-slate-900">
-            <span id="typingText">Sam is typing...</span>
+            <span id="typingText">Roommate is typing...</span>
           </div>
 
           <!-- Bottom Message Input Bar -->
@@ -258,6 +313,99 @@
 
     </div>
 
+  </div>
+
+    <!-- CHANGE ADMIN PIN MODAL -->
+  <div id="changePinModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-lg border border-amber-500/50 max-w-xs w-full p-4 font-mono text-xs shadow-2xl">
+      <div class="font-bold text-amber-300 text-sm mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-key text-amber-400"></i>
+        <span>Change Admin PIN</span>
+      </div>
+      <div class="text-slate-400 text-[11px] mb-3">
+        Enter your current PIN, then enter your new 4-character PIN.
+      </div>
+      <div class="space-y-2.5">
+        <div>
+          <label class="block text-slate-300 text-[10px] mb-1 font-bold">Current PIN:</label>
+          <input type="password" id="currentAdminPinInput" placeholder="Current PIN" maxlength="4" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200 text-center tracking-widest text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-slate-300 text-[10px] mb-1 font-bold">New PIN (4 chars max):</label>
+          <input type="password" id="newAdminPinInput" placeholder="New PIN" maxlength="4" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200 text-center tracking-widest text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-slate-300 text-[10px] mb-1 font-bold">Confirm New PIN:</label>
+          <input type="password" id="confirmAdminPinInput" placeholder="Confirm New PIN" maxlength="4" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200 text-center tracking-widest text-sm focus:outline-none focus:border-amber-500">
+        </div>
+      </div>
+      <div id="pinErrorMsg" class="hidden text-red-400 text-[10px] mt-2 text-center font-bold"></div>
+      <div class="flex justify-end gap-2 mt-4 pt-2 border-t border-slate-800">
+        <button id="cancelChangePinBtn" class="px-3 py-1 text-slate-400 hover:text-slate-200">Cancel</button>
+        <button id="saveChangePinBtn" class="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded">Save PIN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ONBOARDING MODAL: WELCOME NEW ROOMMATE -->
+  <div id="onboardingModal" class="hidden fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-xl border border-emerald-500/40 max-w-sm w-full p-5 font-mono text-xs shadow-2xl">
+      <div class="font-bold text-emerald-400 text-base mb-1 flex items-center gap-2">
+        <i class="fa-solid fa-house-chimney text-emerald-400"></i>
+        <span>Welcome to Apartment 404</span>
+      </div>
+      <p class="text-slate-400 text-[11px] mb-4">
+        Set your profile for this browser session. Everything is saved locally to your device.
+      </p>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">Your Nickname:</label>
+          <input type="text" id="onboardNickInput" placeholder="e.g. Maya, Jordan, Alex" maxlength="16" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-100 text-xs focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">Room / Description (Optional):</label>
+          <input type="text" id="onboardRoomInput" placeholder="e.g. Room 2, Upstairs, Guest" maxlength="24" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-100 text-xs focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <div class="pt-2 border-t border-slate-800">
+          <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+            <input type="checkbox" id="onboardAdminCheckbox" class="rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-0">
+            <span class="text-[11px]">I am the House Admin (@OP)</span>
+          </label>
+        </div>
+
+        <div id="onboardPinContainer" class="hidden pt-1">
+          <label class="block text-amber-300 text-[11px] font-bold mb-1">Admin PIN (Default: 4040):</label>
+          <input type="password" id="onboardPinInput" placeholder="Enter PIN..." maxlength="8" class="w-full bg-slate-950 border border-amber-600/50 rounded p-1.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400">
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <button id="saveOnboardBtn" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-xs transition-colors shadow">
+          Enter Apartment Messenger
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN PIN AUTHENTICATION MODAL -->
+  <div id="adminPinModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-lg border border-amber-500/50 max-w-xs w-full p-4 font-mono text-xs shadow-2xl">
+      <div class="font-bold text-amber-300 text-sm mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-lock text-amber-400"></i>
+        <span>Admin Authentication</span>
+      </div>
+      <div class="text-slate-400 text-[11px] mb-3">
+        Enter the House Admin PIN to unlock operator tools (Default PIN: <strong>4040</strong>).
+      </div>
+      <input type="password" id="adminPinInput" placeholder="Enter PIN..." maxlength="8" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200 text-center tracking-widest text-sm focus:outline-none focus:border-amber-500">
+      <div class="flex justify-end gap-2 mt-4 pt-2 border-t border-slate-800">
+        <button id="cancelAdminPinBtn" class="px-3 py-1 text-slate-400 hover:text-slate-200">Cancel</button>
+        <button id="submitAdminPinBtn" class="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded">Unlock OP</button>
+      </div>
+    </div>
   </div>
 
   <!-- EDIT CHANNEL MODAL -->
@@ -314,7 +462,7 @@
       <div class="font-bold text-amber-400 text-sm mb-2 flex items-center justify-between">
         <span class="flex items-center gap-2">
           <i class="fa-solid fa-shield-halved text-amber-400"></i>
-          <span>Admin Control Panel: <span id="targetUserNick">Sam</span></span>
+          <span>Admin Control Panel: <span id="targetUserNick">Roommate</span></span>
         </span>
         <button id="closeAdminUserModalBtn" class="text-slate-500 hover:text-slate-300 font-bold text-sm">×</button>
       </div>
@@ -364,14 +512,23 @@
     </div>
   </div>
 
-  <!-- NICKNAME CHANGE MODAL -->
+  <!-- EDIT PROFILE MODAL -->
   <div id="nickModal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-lg border border-slate-700 max-w-xs w-full p-4 font-mono text-xs">
-      <div class="font-bold text-slate-200 mb-2">Change Nickname</div>
-      <input type="text" id="nickInputField" value="Admin" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200 focus:outline-none focus:border-emerald-500">
-      <div class="flex justify-end gap-2 mt-3">
+      <div class="font-bold text-slate-200 mb-2">Edit Your Profile</div>
+      <div class="space-y-2">
+        <div>
+          <label class="text-[10px] text-slate-400 block mb-0.5">Nickname:</label>
+          <input type="text" id="nickInputField" value="You" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="text-[10px] text-slate-400 block mb-0.5">Room / Note:</label>
+          <input type="text" id="roomInputField" value="Room 1" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 mt-3 pt-2 border-t border-slate-800">
         <button id="cancelNickBtn" class="px-2.5 py-1 text-slate-400 hover:text-slate-200">Cancel</button>
-        <button id="saveNickBtn" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded">OK</button>
+        <button id="saveNickBtn" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded">Save</button>
       </div>
     </div>
   </div>
@@ -418,27 +575,69 @@
         osc.stop(now + 0.15);
       }
 
-      // App Data: Users (Default to Admin with full OP rights)
-      const users = {
-        admin: { id: 'admin', nick: 'Admin', room: 'Lead', status: 'online', isOp: true, isBanned: false },
-        alex: { id: 'alex', nick: 'Alex', room: 'Room 1', status: 'online', isOp: true, isBanned: false },
-        sam: { id: 'sam', nick: 'Sam', room: 'Room 2', status: 'online', isOp: false, isBanned: false },
-        jordan: { id: 'jordan', nick: 'Jordan', room: 'Room 3', status: 'away', isOp: false, isBanned: false },
-        taylor: { id: 'taylor', nick: 'Taylor', room: 'Room 4', status: 'busy', isOp: false, isBanned: false }
+      // App Storage Keys
+      const STORAGE_KEY_DATA = 'apt404_messenger_data_v2';
+      const STORAGE_KEY_USER = 'apt404_messenger_current_user_v2';
+
+      // Current User Session State (Populated on Onboarding or LocalStorage)
+      let currentUser = {
+        id: 'user_' + Math.random().toString(36).substring(2, 9),
+        nick: 'Host',
+        room: 'Room 1',
+        status: 'online',
+        isOp: true,
+        isBanned: false
       };
 
-      // Channels: ZERO preset channels so the user starts with a completely clean slate!
-      const channels = {};
-      const chatHistories = {};
+      // Persistent App Data
+      let channels = {};
+      let chatHistories = {};
+      let knownUsers = {};
+      const adminPinCode = '4040';
 
-      let activePersona = 'admin'; // Start as Admin for full control
+      // Load saved state
+      function loadSavedState() {
+        try {
+          const savedData = localStorage.getItem(STORAGE_KEY_DATA);
+          if (savedData) {
+            const parsed = JSON.parse(savedData);
+            if (parsed.channels) channels = parsed.channels;
+            if (parsed.chatHistories) chatHistories = parsed.chatHistories;
+            if (parsed.knownUsers) knownUsers = parsed.knownUsers;
+            if (parsed.adminPinCode) adminPinCode = parsed.adminPinCode;
+          }
+          const savedUser = localStorage.getItem(STORAGE_KEY_USER);
+          if (savedUser) {
+            currentUser = JSON.parse(savedUser);
+          }
+        } catch(e) {}
+      }
+
+      function persistState() {
+        try {
+          const payload = {
+            channels,
+            chatHistories,
+            knownUsers,
+            adminPinCode
+          };
+          localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(payload));
+          localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(currentUser));
+        } catch(e) {}
+      }
+
+      loadSavedState();
+
+      // Ensure current user is in knownUsers
+      knownUsers[currentUser.id] = currentUser;
+
       let currentLocation = 'lobby'; // 'lobby', channel id, or 'pm_<userId>'
-      let selectedTargetUser = 'sam';
+      let selectedTargetUser = null;
       let editingChanId = null;
       const bc = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('apt404-irc-channel') : null;
 
       function isCurrentAdmin() {
-        return users[activePersona] && users[activePersona].isOp;
+        return currentUser && currentUser.isOp;
       }
 
       function showToast(msg) {
@@ -454,44 +653,68 @@
         const adminBadge = document.getElementById('adminTitleBadge');
         const roleBadge = document.getElementById('myRoleBadge');
         const adminBtn = document.getElementById('adminPanelTopBtn');
+        const addChanBtn = document.getElementById('addChannelBtn');
+        const switchAdminBtn = document.getElementById('switchAdminBtn');
         const deleteActiveChanBtn = document.getElementById('deleteActiveChanBtn');
         const editActiveChanBtn = document.getElementById('editActiveChanBtn');
 
+        document.getElementById('myNickDisplay').textContent = currentUser.nick;
+        document.getElementById('myRoomDisplay').textContent = currentUser.room || 'Member';
+
+        const lobbyConsole = document.getElementById('lobbyAdminConsole');
         if (isAdmin) {
           adminBadge.classList.remove('hidden');
           roleBadge.classList.remove('hidden');
           adminBtn.classList.remove('hidden');
+          addChanBtn.classList.remove('hidden');
+          switchAdminBtn.textContent = 'Admin (@OP)';
+          switchAdminBtn.className = 'text-amber-400 font-bold text-[11px] font-mono px-1.5 py-0.5 bg-amber-950/40 border border-amber-600/40 rounded ml-1';
           if (currentLocation !== 'lobby' && !currentLocation.startsWith('pm_')) {
             deleteActiveChanBtn.classList.remove('hidden');
             editActiveChanBtn.classList.remove('hidden');
+            if (lobbyConsole) lobbyConsole.classList.add('hidden');
           } else {
             deleteActiveChanBtn.classList.add('hidden');
             editActiveChanBtn.classList.add('hidden');
+            if (lobbyConsole) {
+              lobbyConsole.classList.remove('hidden');
+              document.getElementById('consoleChanCount').textContent = Object.keys(channels).length;
+              document.getElementById('consoleUserCount').textContent = Object.keys(knownUsers).length;
+            }
           }
         } else {
           adminBadge.classList.add('hidden');
           roleBadge.classList.add('hidden');
           adminBtn.classList.add('hidden');
+          addChanBtn.classList.add('hidden');
+          switchAdminBtn.textContent = 'Unlock Admin';
+          switchAdminBtn.className = 'text-slate-400 hover:text-amber-300 text-[11px] font-mono px-1.5 py-0.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded ml-1';
           deleteActiveChanBtn.classList.add('hidden');
           editActiveChanBtn.classList.add('hidden');
+          if (lobbyConsole) lobbyConsole.classList.add('hidden');
         }
 
         renderChannelsSidebar();
         renderOnlineUsersList();
       }
 
-      // Render Channels in Sidebar (Always show edit and delete buttons)
+      // Render Channels in Sidebar
       function renderChannelsSidebar() {
         const container = document.getElementById('channelsContainer');
         container.innerHTML = '';
         const chanKeys = Object.keys(channels);
         document.getElementById('channelCountBadge').textContent = chanKeys.length;
+        const isAdmin = isCurrentAdmin();
 
         if (chanKeys.length === 0) {
           const emptyNotice = document.createElement('div');
           emptyNotice.className = 'text-slate-500 font-mono text-[11px] p-2 text-center border border-dashed border-slate-800 rounded my-1';
-          emptyNotice.innerHTML = 'No channels yet.<br><span class="text-emerald-400 font-bold cursor-pointer hover:underline" id="emptyNoticeAddBtn">+ Create your first channel</span>';
-          emptyNotice.querySelector('#emptyNoticeAddBtn').addEventListener('click', openCreateChannelModal);
+          if (isAdmin) {
+            emptyNotice.innerHTML = 'No channels yet.<br><span class="text-emerald-400 font-bold cursor-pointer hover:underline" id="emptyNoticeAddBtn">+ Create your first channel</span>';
+            emptyNotice.querySelector('#emptyNoticeAddBtn').addEventListener('click', openCreateChannelModal);
+          } else {
+            emptyNotice.innerHTML = 'No channels yet.<br><span class="text-slate-600">Waiting for house admin.</span>';
+          }
           container.appendChild(emptyNotice);
           return;
         }
@@ -502,14 +725,20 @@
           row.className = 'channel-row p-2 hover:bg-slate-800 border border-transparent hover:border-slate-700 rounded cursor-pointer flex items-center justify-between text-xs transition-colors bg-slate-850/40 group';
           row.setAttribute('data-channel', key);
 
+          const adminButtonsHtml = isAdmin ? `
+            <div class="hidden group-hover:flex items-center gap-0.5">
+              <button class="edit-chan-btn text-slate-400 hover:text-amber-300 px-1 py-0.5 rounded text-[10px] hover:bg-slate-700" title="Edit Channel Settings">✎</button>
+              <button class="del-chan-btn text-slate-500 hover:text-red-400 px-1 py-0.5 rounded text-[10px] hover:bg-slate-700" title="Delete Channel">×</button>
+            </div>
+          ` : '';
+
           row.innerHTML = `
             <div class="flex items-center gap-1.5 truncate">
               <span class="font-mono font-bold text-emerald-400">#</span>
               <span class="font-mono font-bold text-slate-200 truncate">${chan.name}</span>
             </div>
             <div class="flex items-center gap-1">
-              <button class="edit-chan-btn text-slate-400 hover:text-amber-300 px-1 py-0.5 rounded text-[10px] hover:bg-slate-700" title="Edit Channel Settings">✎</button>
-              <button class="del-chan-btn text-slate-500 hover:text-red-400 px-1 py-0.5 rounded text-[10px] hover:bg-slate-700" title="Delete Channel">×</button>
+              ${adminButtonsHtml}
             </div>
           `;
 
@@ -529,36 +758,42 @@
         });
       }
 
-      // Render Online Users in Sidebar
+      // Render Online Roommates in Sidebar (Only Real Users)
       function renderOnlineUsersList() {
         const container = document.getElementById('peopleDropdownContainer');
         container.innerHTML = '';
 
-        const userKeys = Object.keys(users);
-        const count = userKeys.filter(k => users[k].status !== 'offline').length;
+        const userKeys = Object.keys(knownUsers);
+        const count = userKeys.length;
         document.getElementById('onlineCountBadge').textContent = `(${count})`;
 
         userKeys.forEach(k => {
-          const u = users[k];
-          if (k === activePersona) return; // don't show self in roommate list
+          const u = knownUsers[k];
+          if (k === currentUser.id) return; // don't show self in roommate list
 
           const row = document.createElement('div');
           row.className = 'user-row px-2 py-1.5 hover:bg-slate-800 rounded cursor-pointer flex items-center justify-between text-xs transition-colors group';
           row.setAttribute('data-user', k);
 
-          const statusClass = u.isBanned ? 'status-banned' : `status-${u.status}`;
+          const statusClass = u.isBanned ? 'status-banned' : 'status-online';
           const opBadge = u.isOp ? `<span class="text-[9px] text-amber-300 font-bold ml-1 font-mono">@OP</span>` : '';
           const bannedLabel = u.isBanned ? `<span class="text-[9px] text-red-400 font-bold ml-1 font-mono">[BANNED]</span>` : '';
+
+          const isAdmin = isCurrentAdmin();
+          const adminBtnHtml = isAdmin ? `
+            <button class="admin-user-btn text-[10px] text-amber-400 hover:text-amber-200 px-1 hover:bg-slate-700 rounded font-mono" title="Admin actions">⚙</button>
+          ` : '';
 
           row.innerHTML = `
             <div class="flex items-center gap-1.5 truncate">
               <span class="w-1.5 h-1.5 rounded-full ${statusClass} flex-shrink-0"></span>
               <span class="font-mono text-slate-200 truncate">${u.nick}</span>
+              <span class="text-[10px] text-slate-500 font-mono truncate hidden group-hover:inline">${u.room || ''}</span>
               ${opBadge}
               ${bannedLabel}
             </div>
             <div class="flex items-center gap-1">
-              <button class="admin-user-btn text-[10px] text-amber-400 hover:text-amber-200 px-1 hover:bg-slate-700 rounded font-mono" title="Admin actions">⚙</button>
+              ${adminBtnHtml}
               <button class="pm-btn text-[10px] bg-slate-750 group-hover:bg-emerald-600 group-hover:text-white text-slate-400 px-1.5 py-0.5 rounded font-mono" title="Private Message">
                 PM
               </button>
@@ -576,10 +811,32 @@
 
           container.appendChild(row);
         });
+
+        if (container.children.length === 0) {
+          const soloNotice = document.createElement('div');
+          soloNotice.className = 'text-[11px] text-slate-500 font-mono p-1 text-center';
+          soloNotice.textContent = 'You are the only one online right now.';
+          container.appendChild(soloNotice);
+        }
       }
 
       // Channel Management: Add, Edit, Delete
+      function openCreateChannelModal() {
+        if (!isCurrentAdmin()) {
+          showToast('Only Admins can create new channels');
+          return;
+        }
+        document.getElementById('newChanNameInput').value = '';
+        document.getElementById('newChanTopicInput').value = '';
+        document.getElementById('createChanModal').classList.remove('hidden');
+        document.getElementById('newChanNameInput').focus();
+      }
+
       function openEditChannelModal(chanId) {
+        if (!isCurrentAdmin()) {
+          showToast('Error: Operator permission required to edit channels');
+          return;
+        }
         const chan = channels[chanId];
         if (!chan) return;
         editingChanId = chanId;
@@ -608,6 +865,7 @@
           });
         }
 
+        persistState();
         renderChannelsSidebar();
         document.getElementById('editChanModal').classList.add('hidden');
         showToast(`Channel ${newName} updated`);
@@ -619,7 +877,7 @@
               id: editingChanId,
               name: newName,
               topic: channels[editingChanId].topic,
-              admin: users[activePersona].nick
+              admin: currentUser.nick
             });
           } catch(e) {}
         }
@@ -644,16 +902,17 @@
         };
 
         chatHistories[id] = [
-          { type: 'system', text: `* Channel ${cleanName} created by ${users[activePersona].nick}` },
+          { type: 'system', text: `* Channel ${cleanName} created by ${currentUser.nick}` },
           { type: 'system', text: `* Topic: ${channels[id].topic}` }
         ];
 
+        persistState();
         renderChannelsSidebar();
         showToast(`Created channel ${cleanName}`);
 
         if (bc) {
           try {
-            bc.postMessage({ type: 'create_chan', id, name: cleanName, topic: channels[id].topic, creator: users[activePersona].nick });
+            bc.postMessage({ type: 'create_chan', id, name: cleanName, topic: channels[id].topic, creator: currentUser.nick });
           } catch(e) {}
         }
 
@@ -661,6 +920,11 @@
       }
 
       function deleteChannel(chanId) {
+        if (!isCurrentAdmin()) {
+          showToast('Error: Operator permission required to delete channels');
+          return;
+        }
+
         const name = channels[chanId] ? channels[chanId].name : chanId;
         delete channels[chanId];
         delete chatHistories[chanId];
@@ -669,12 +933,13 @@
           showLobby();
         }
 
+        persistState();
         renderChannelsSidebar();
         showToast(`Channel ${name} removed`);
 
         if (bc) {
           try {
-            bc.postMessage({ type: 'delete_chan', id: chanId, name, admin: users[activePersona].nick });
+            bc.postMessage({ type: 'delete_chan', id: chanId, name, admin: currentUser.nick });
           } catch(e) {}
         }
       }
@@ -682,7 +947,7 @@
       // Admin User Modal Controls
       function openAdminUserModal(userId) {
         selectedTargetUser = userId;
-        const u = users[userId];
+        const u = knownUsers[userId];
         if (!u) return;
 
         document.getElementById('targetUserNick').textContent = u.nick;
@@ -716,31 +981,32 @@
 
       // Promote / Demote
       function toggleOpStatus(userId) {
-        const u = users[userId];
+        const u = knownUsers[userId];
         if (!u) return;
         u.isOp = !u.isOp;
 
         const actionText = u.isOp ? `promoted ${u.nick} to Operator (@OP)` : `demoted ${u.nick} to regular user`;
         if (currentLocation !== 'lobby') {
-          appendMessageElement({ type: 'system', text: `* ${users[activePersona].nick} ${actionText}` });
+          appendMessageElement({ type: 'system', text: `* ${currentUser.nick} ${actionText}` });
         }
+        persistState();
         showToast(`${u.nick} is now ${u.isOp ? 'an Operator' : 'a regular user'}`);
         renderOnlineUsersList();
         openAdminUserModal(userId);
 
         if (bc) {
           try {
-            bc.postMessage({ type: 'op_change', userId, isOp: u.isOp, admin: users[activePersona].nick });
+            bc.postMessage({ type: 'op_change', userId, isOp: u.isOp, admin: currentUser.nick });
           } catch(e) {}
         }
       }
 
       // Kick User
       function kickUser(userId, reason) {
-        const u = users[userId];
+        const u = knownUsers[userId];
         if (!u) return;
 
-        const kickMsg = `* ${u.nick} was kicked by ${users[activePersona].nick} (${reason || 'Rule violation'})`;
+        const kickMsg = `* ${u.nick} was kicked by ${currentUser.nick} (${reason || 'Rule violation'})`;
         if (currentLocation !== 'lobby') {
           appendMessageElement({ type: 'system', text: kickMsg });
         }
@@ -749,31 +1015,32 @@
 
         if (bc) {
           try {
-            bc.postMessage({ type: 'kick', userId, reason: reason || 'Rule violation', admin: users[activePersona].nick });
+            bc.postMessage({ type: 'kick', userId, reason: reason || 'Rule violation', admin: currentUser.nick });
           } catch(e) {}
         }
       }
 
       // Ban / Unban User
       function toggleBanStatus(userId) {
-        const u = users[userId];
+        const u = knownUsers[userId];
         if (!u) return;
         u.isBanned = !u.isBanned;
 
         const banMsg = u.isBanned 
-          ? `* ${u.nick} was BANNED from the apartment network by ${users[activePersona].nick}`
-          : `* ${u.nick} was UNBANNED by ${users[activePersona].nick}`;
+          ? `* ${u.nick} was BANNED from the apartment network by ${currentUser.nick}`
+          : `* ${u.nick} was UNBANNED by ${currentUser.nick}`;
 
         if (currentLocation !== 'lobby') {
           appendMessageElement({ type: 'system', text: banMsg });
         }
+        persistState();
         showToast(`${u.nick} ${u.isBanned ? 'banned' : 'unbanned'}`);
         renderOnlineUsersList();
         openAdminUserModal(userId);
 
         if (bc) {
           try {
-            bc.postMessage({ type: 'ban_change', userId, isBanned: u.isBanned, admin: users[activePersona].nick });
+            bc.postMessage({ type: 'ban_change', userId, isBanned: u.isBanned, admin: currentUser.nick });
           } catch(e) {}
         }
       }
@@ -807,11 +1074,11 @@
       }
 
       function openPrivateMessage(userId) {
-        if (userId === activePersona) {
+        if (userId === currentUser.id) {
           showToast('Cannot private message yourself');
           return;
         }
-        const target = users[userId];
+        const target = knownUsers[userId];
         if (!target) return;
 
         const pmKey = `pm_${userId}`;
@@ -849,19 +1116,27 @@
         log.scrollTop = log.scrollHeight;
       }
 
+      // Message Rendering with Like & Dislike Reaction Buttons
       function appendMessageElement(data, saveToHistory = true) {
         const log = document.getElementById('chatMessagesLog');
         const time = data.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const msgId = data.id || ('msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6));
+        data.id = msgId;
+        data.likes = data.likes || 0;
+        data.dislikes = data.dislikes || 0;
+        data.reactions = data.reactions || {}; // map of userId -> 'like' | 'dislike'
 
         if (saveToHistory && currentLocation !== 'lobby') {
           if (!chatHistories[currentLocation]) {
             chatHistories[currentLocation] = [];
           }
           chatHistories[currentLocation].push({ ...data, time });
+          persistState();
         }
 
         const row = document.createElement('div');
-        row.className = 'leading-relaxed break-words';
+        row.id = msgId;
+        row.className = 'leading-relaxed break-words group py-0.5 px-1 rounded hover:bg-slate-900/60 transition-colors flex items-start justify-between gap-2';
 
         if (data.type === 'system') {
           row.className = 'text-slate-500 font-mono text-[11px] italic my-0.5';
@@ -872,14 +1147,39 @@
         } else {
           const isOp = data.isOp || (data.nick === 'Admin');
           const prefix = isOp ? '@' : '';
-          const isMe = data.nick === users[activePersona].nick;
+          const isMe = data.nick === currentUser.nick;
           const nickColor = isOp ? 'text-amber-400 font-bold' : (isMe ? 'text-emerald-400 font-bold' : 'text-sky-400 font-bold');
 
+          const userReaction = data.reactions[currentUser.id];
+          const likeActive = userReaction === 'like' ? 'reaction-active-like' : '';
+          const dislikeActive = userReaction === 'dislike' ? 'reaction-active-dislike' : '';
+
           row.innerHTML = `
-            <span class="text-slate-500 text-[11px] select-none">[${time}]</span>
-            <span class="${nickColor}">&lt;${prefix}${data.nick}&gt;</span>
-            <span class="text-slate-200">${escapeHtml(data.text)}</span>
+            <div class="flex-grow">
+              <span class="text-slate-500 text-[11px] select-none">[${time}]</span>
+              <span class="${nickColor}">&lt;${prefix}${escapeHtml(data.nick)}&gt;</span>
+              <span class="text-slate-200">${escapeHtml(data.text)}</span>
+            </div>
+            <!-- Reaction Buttons -->
+            <div class="flex items-center gap-1 select-none flex-shrink-0 text-[11px] font-mono">
+              <button class="reaction-pill ${likeActive} flex items-center gap-1 px-1.5 py-0.5 rounded border border-slate-700 bg-slate-850 text-slate-400 hover:text-emerald-400 text-[10px]" data-react="like" title="Like">
+                <span>👍</span>
+                <span class="like-counter font-bold">${data.likes > 0 ? data.likes : ''}</span>
+              </button>
+              <button class="reaction-pill ${dislikeActive} flex items-center gap-1 px-1.5 py-0.5 rounded border border-slate-700 bg-slate-850 text-slate-400 hover:text-red-400 text-[10px]" data-react="dislike" title="Dislike">
+                <span>👎</span>
+                <span class="dislike-counter font-bold">${data.dislikes > 0 ? data.dislikes : ''}</span>
+              </button>
+            </div>
           `;
+
+          // Reaction click listener
+          row.querySelectorAll('.reaction-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const reactType = btn.getAttribute('data-react');
+              toggleReaction(msgId, reactType);
+            });
+          });
         }
 
         log.appendChild(row);
@@ -887,15 +1187,56 @@
       }
 
       function escapeHtml(str) {
-        return str
+        return (str || '')
           .replace(/&/g, '&amp;')
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;');
       }
 
+      // Reaction Toggle Logic
+      function toggleReaction(msgId, reactType) {
+        if (!chatHistories[currentLocation]) return;
+        const msg = chatHistories[currentLocation].find(m => m.id === msgId);
+        if (!msg) return;
+
+        msg.reactions = msg.reactions || {};
+        const prev = msg.reactions[currentUser.id];
+
+        if (prev === reactType) {
+          // Untoggle
+          delete msg.reactions[currentUser.id];
+          if (reactType === 'like') msg.likes = Math.max(0, (msg.likes || 1) - 1);
+          if (reactType === 'dislike') msg.dislikes = Math.max(0, (msg.dislikes || 1) - 1);
+        } else {
+          // Switch or add
+          if (prev === 'like') msg.likes = Math.max(0, (msg.likes || 1) - 1);
+          if (prev === 'dislike') msg.dislikes = Math.max(0, (msg.dislikes || 1) - 1);
+
+          msg.reactions[currentUser.id] = reactType;
+          if (reactType === 'like') msg.likes = (msg.likes || 0) + 1;
+          if (reactType === 'dislike') msg.dislikes = (msg.dislikes || 0) + 1;
+        }
+
+        persistState();
+        renderChat(currentLocation);
+
+        if (bc) {
+          try {
+            bc.postMessage({
+              type: 'reaction_update',
+              location: currentLocation,
+              msgId: msgId,
+              likes: msg.likes,
+              dislikes: msg.dislikes,
+              reactions: msg.reactions
+            });
+          } catch(e) {}
+        }
+      }
+
       // Send Message / Command Handler
       function handleSendMessage() {
-        if (users[activePersona].isBanned) {
+        if (currentUser.isBanned) {
           showToast('You are banned from sending messages.');
           return;
         }
@@ -916,7 +1257,6 @@
           return;
         }
 
-        const currentUser = users[activePersona];
         appendMessageElement({
           type: 'msg',
           nick: currentUser.nick,
@@ -937,11 +1277,6 @@
             });
           } catch(e) {}
         }
-
-        const simBots = document.getElementById('botRepliesToggle').checked;
-        if (simBots) {
-          triggerRoommateSimResponse(text, currentLocation);
-        }
       }
 
       function handleCommand(cmd) {
@@ -953,17 +1288,20 @@
           const actionText = parts.slice(1).join(' ');
           appendMessageElement({
             type: 'action',
-            nick: users[activePersona].nick,
+            nick: currentUser.nick,
             text: actionText
           });
         } else if (c === '/clear') {
           chatHistories[currentLocation] = [];
+          persistState();
           renderChat(currentLocation);
           showToast('Chat window cleared');
         } else if (c === '/nick' && parts[1]) {
-          const oldNick = users[activePersona].nick;
+          const oldNick = currentUser.nick;
           const newNick = parts[1];
-          users[activePersona].nick = newNick;
+          currentUser.nick = newNick;
+          knownUsers[currentUser.id].nick = newNick;
+          persistState();
           document.getElementById('myNickDisplay').textContent = newNick;
           appendMessageElement({
             type: 'system',
@@ -992,31 +1330,34 @@
           if (parts.length > 1) {
             const newTop = parts.slice(1).join(' ');
             channels[currentLocation].topic = newTop;
+            persistState();
             document.getElementById('channelTopic').textContent = `[${newTop}]`;
-            appendMessageElement({ type: 'system', text: `* ${users[activePersona].nick} changed the topic of ${channels[currentLocation].name} to: "${newTop}"` });
+            appendMessageElement({ type: 'system', text: `* ${currentUser.nick} changed the topic of ${channels[currentLocation].name} to: "${newTop}"` });
           } else {
             appendMessageElement({ type: 'system', text: `* Current topic for ${channels[currentLocation].name}: ${channels[currentLocation].topic}` });
           }
         } else if (c === '/op' && parts[1]) {
-          const targetKey = Object.keys(users).find(k => users[k].nick.toLowerCase() === parts[1].toLowerCase());
+          const targetKey = Object.keys(knownUsers).find(k => knownUsers[k].nick.toLowerCase() === parts[1].toLowerCase());
           if (targetKey) {
-            users[targetKey].isOp = true;
-            appendMessageElement({ type: 'system', text: `* ${users[activePersona].nick} promoted ${users[targetKey].nick} to Operator (@OP)` });
+            knownUsers[targetKey].isOp = true;
+            persistState();
+            appendMessageElement({ type: 'system', text: `* ${currentUser.nick} promoted ${knownUsers[targetKey].nick} to Operator (@OP)` });
             renderOnlineUsersList();
           } else {
             appendMessageElement({ type: 'system', text: `* User ${parts[1]} not found` });
           }
         } else if (c === '/deop' && parts[1]) {
-          const targetKey = Object.keys(users).find(k => users[k].nick.toLowerCase() === parts[1].toLowerCase());
+          const targetKey = Object.keys(knownUsers).find(k => knownUsers[k].nick.toLowerCase() === parts[1].toLowerCase());
           if (targetKey) {
-            users[targetKey].isOp = false;
-            appendMessageElement({ type: 'system', text: `* ${users[activePersona].nick} demoted ${users[targetKey].nick} from Operator` });
+            knownUsers[targetKey].isOp = false;
+            persistState();
+            appendMessageElement({ type: 'system', text: `* ${currentUser.nick} demoted ${knownUsers[targetKey].nick} from Operator` });
             renderOnlineUsersList();
           } else {
             appendMessageElement({ type: 'system', text: `* User ${parts[1]} not found` });
           }
         } else if (c === '/kick' && parts[1]) {
-          const targetKey = Object.keys(users).find(k => users[k].nick.toLowerCase() === parts[1].toLowerCase());
+          const targetKey = Object.keys(knownUsers).find(k => knownUsers[k].nick.toLowerCase() === parts[1].toLowerCase());
           if (targetKey) {
             const reason = parts.slice(2).join(' ') || 'Kicked by Operator';
             kickUser(targetKey, reason);
@@ -1024,95 +1365,58 @@
             appendMessageElement({ type: 'system', text: `* User ${parts[1]} not found` });
           }
         } else if (c === '/ban' && parts[1]) {
-          const targetKey = Object.keys(users).find(k => users[k].nick.toLowerCase() === parts[1].toLowerCase());
+          const targetKey = Object.keys(knownUsers).find(k => knownUsers[k].nick.toLowerCase() === parts[1].toLowerCase());
           if (targetKey) {
-            users[targetKey].isBanned = true;
-            appendMessageElement({ type: 'system', text: `* ${users[targetKey].nick} was BANNED by ${users[activePersona].nick}` });
+            knownUsers[targetKey].isBanned = true;
+            persistState();
+            appendMessageElement({ type: 'system', text: `* ${knownUsers[targetKey].nick} was BANNED by ${currentUser.nick}` });
             renderOnlineUsersList();
           } else {
             appendMessageElement({ type: 'system', text: `* User ${parts[1]} not found` });
           }
         } else if (c === '/unban' && parts[1]) {
-          const targetKey = Object.keys(users).find(k => users[k].nick.toLowerCase() === parts[1].toLowerCase());
+          const targetKey = Object.keys(knownUsers).find(k => knownUsers[k].nick.toLowerCase() === parts[1].toLowerCase());
           if (targetKey) {
-            users[targetKey].isBanned = false;
-            appendMessageElement({ type: 'system', text: `* ${users[targetKey].nick} was UNBANNED by ${users[activePersona].nick}` });
+            knownUsers[targetKey].isBanned = false;
+            persistState();
+            appendMessageElement({ type: 'system', text: `* ${knownUsers[targetKey].nick} was UNBANNED by ${currentUser.nick}` });
             renderOnlineUsersList();
           } else {
             appendMessageElement({ type: 'system', text: `* User ${parts[1]} not found` });
           }
+        } else if (c === '/pin' && parts[1]) {
+          if (!isAdmin) {
+            appendMessageElement({ type: 'system', text: '* Error: Operator permissions (+o) required to change Admin PIN' });
+            return;
+          }
+          adminPinCode = parts[1].trim();
+          persistState();
+          appendMessageElement({ type: 'system', text: `* Admin PIN updated successfully to: ${adminPinCode}` });
+          showToast(`Admin PIN updated to ${adminPinCode}`);
         } else if (c === '/help') {
-          appendMessageElement({ type: 'system', text: '* Standard: /me <action>, /clear, /nick <name>, /join <channel>, /topic [text], /help' });
-          appendMessageElement({ type: 'system', text: '* Admin: /op <nick>, /deop <nick>, /kick <nick> [reason], /ban <nick>, /unban <nick>, /addchan <name>, /delchan <name>' });
+          appendMessageElement({ type: 'system', text: '==================== COMMAND REFERENCE ====================' });
+          appendMessageElement({ type: 'system', text: '* /me <action>          - Broadcast an action message' });
+          appendMessageElement({ type: 'system', text: '* /nick <new_name>      - Change your display nickname' });
+          appendMessageElement({ type: 'system', text: '* /join <#channel>      - Switch to or create a channel' });
+          appendMessageElement({ type: 'system', text: '* /topic [new_topic]    - View or update current channel topic' });
+          appendMessageElement({ type: 'system', text: '* /clear                - Clear conversation transcript' });
+          appendMessageElement({ type: 'system', text: '* /help                 - Display this complete command list' });
+          if (isAdmin) {
+            appendMessageElement({ type: 'system', text: '-------------- HOUSE ADMIN / OP COMMANDS (@OP) --------------' });
+            appendMessageElement({ type: 'system', text: '* /addchan <#name> [topic] - Create a new channel' });
+            appendMessageElement({ type: 'system', text: '* /delchan <#name>         - Delete an existing channel' });
+            appendMessageElement({ type: 'system', text: '* /topic <new_topic>       - Set channel description' });
+            appendMessageElement({ type: 'system', text: '* /op <nick>               - Promote roommate to Operator (@OP)' });
+            appendMessageElement({ type: 'system', text: '* /deop <nick>             - Demote Operator to standard member' });
+            appendMessageElement({ type: 'system', text: '* /kick <nick> [reason]    - Eject roommate from channel' });
+            appendMessageElement({ type: 'system', text: '* /ban <nick>              - Network ban user from chatting' });
+            appendMessageElement({ type: 'system', text: '* /unban <nick>            - Lift ban on user' });
+            appendMessageElement({ type: 'system', text: '* /pin <new_pin>           - Update House Admin PIN' });
+          }
+          appendMessageElement({ type: 'system', text: '===========================================================' });
         } else {
           appendMessageElement({ type: 'system', text: `* Unknown command: ${parts[0]}` });
         }
-      }
-
-      // Roommate Simulated Bot Response
-      function triggerRoommateSimResponse(incomingText, loc) {
-        const indicator = document.getElementById('typingIndicator');
-        const typingText = document.getElementById('typingText');
-
-        let botKey = 'sam';
-        if (loc.startsWith('pm_')) {
-          botKey = loc.replace('pm_', '');
-        } else {
-          const others = Object.keys(users).filter(k => k !== activePersona && !users[k].isBanned);
-          if (others.length === 0) return;
-          botKey = others[Math.floor(Math.random() * others.length)];
-        }
-
-        const bot = users[botKey];
-        if (!bot || bot.isBanned) return;
-
-        const delay = 900 + Math.random() * 1000;
-
-        setTimeout(() => {
-          if (currentLocation !== loc) return;
-          typingText.textContent = `${bot.nick} is typing...`;
-          indicator.classList.remove('hidden');
-
-          setTimeout(() => {
-            indicator.classList.add('hidden');
-            if (currentLocation !== loc) return;
-
-            let reply = '';
-            const lower = incomingText.toLowerCase();
-
-            if (loc.startsWith('pm_')) {
-              if (lower.includes('up') || lower.includes('awake')) {
-                reply = "Yeah, working on my laptop. What's up?";
-              } else if (lower.includes('borrow') || lower.includes('charger')) {
-                reply = "Sure thing, it's on my desk.";
-              } else {
-                const pmReplies = [
-                  'Got it, sounds good.',
-                  'Will do!',
-                  'Thanks for letting me know.',
-                  'Yeah definitely.'
-                ];
-                reply = pmReplies[Math.floor(Math.random() * pmReplies.length)];
-              }
-            } else {
-              const generic = [
-                'Sounds good',
-                'Agreed',
-                "I'm heading back to the apartment soon",
-                'Anyone need anything from the corner store?'
-              ];
-              reply = generic[Math.floor(Math.random() * generic.length)];
-            }
-
-            appendMessageElement({
-              type: 'msg',
-              nick: bot.nick,
-              isOp: bot.isOp,
-              text: reply
-            });
-            playMessageTone();
-          }, delay);
-        }, 300);
       }
 
       // Event Listeners
@@ -1151,12 +1455,14 @@
         toggleDropdown();
       });
 
-      // Nickname change modal
+      // Profile edit modal
       const nickModal = document.getElementById('nickModal');
       const nickInputField = document.getElementById('nickInputField');
+      const roomInputField = document.getElementById('roomInputField');
 
       document.getElementById('changeNickBtn').addEventListener('click', () => {
-        nickInputField.value = users[activePersona].nick;
+        nickInputField.value = currentUser.nick;
+        roomInputField.value = currentUser.room || '';
         nickModal.classList.remove('hidden');
         nickInputField.focus();
       });
@@ -1167,41 +1473,83 @@
 
       document.getElementById('saveNickBtn').addEventListener('click', () => {
         const val = nickInputField.value.trim();
+        const rm = roomInputField.value.trim();
         if (val) {
-          const old = users[activePersona].nick;
-          users[activePersona].nick = val;
-          document.getElementById('myNickDisplay').textContent = val;
+          const old = currentUser.nick;
+          currentUser.nick = val;
+          currentUser.room = rm;
+          knownUsers[currentUser.id].nick = val;
+          knownUsers[currentUser.id].room = rm;
+          persistState();
+
+          updateAdminUiState();
           if (currentLocation !== 'lobby') {
             appendMessageElement({ type: 'system', text: `* ${old} is now known as ${val}` });
           }
-          renderOnlineUsersList();
-          showToast(`Nick updated to ${val}`);
+          showToast(`Profile updated: ${val}`);
+
+          if (bc) {
+            try {
+              bc.postMessage({ type: 'user_profile_update', user: currentUser });
+            } catch(e) {}
+          }
         }
         nickModal.classList.add('hidden');
       });
 
-      // Persona Selector
-      document.getElementById('personaSelect').addEventListener('change', (e) => {
-        activePersona = e.target.value;
-        const current = users[activePersona];
-        document.getElementById('myNickDisplay').textContent = current.nick;
+      // Admin PIN unlock button in user bar
+      const adminPinModal = document.getElementById('adminPinModal');
+      const adminPinInput = document.getElementById('adminPinInput');
+      const switchAdminBtn = document.getElementById('switchAdminBtn');
 
-        updateAdminUiState();
-        showToast(`Switched persona to ${current.nick} ${current.isOp ? '[OP]' : ''}`);
-        playMessageTone();
+      switchAdminBtn.addEventListener('click', () => {
+        if (currentUser.isOp) {
+          showToast('You already have House Admin (@OP) access');
+          return;
+        }
+        adminPinInput.value = '';
+        adminPinModal.classList.remove('hidden');
+        adminPinInput.focus();
+      });
+
+      document.getElementById('cancelAdminPinBtn').addEventListener('click', () => {
+        adminPinModal.classList.add('hidden');
+      });
+
+      document.getElementById('submitAdminPinBtn').addEventListener('click', () => {
+        const val = adminPinInput.value.trim();
+        if (val === adminPinCode) {
+          currentUser.isOp = true;
+          knownUsers[currentUser.id].isOp = true;
+          persistState();
+          adminPinModal.classList.add('hidden');
+          updateAdminUiState();
+          showToast('House Admin (@OP) access granted!');
+          if (currentLocation !== 'lobby') {
+            appendMessageElement({ type: 'system', text: `* ${currentUser.nick} unlocked Operator permissions (@OP)` });
+          }
+          if (bc) {
+            try {
+              bc.postMessage({ type: 'op_change', userId: currentUser.id, isOp: true, admin: currentUser.nick });
+            } catch(e) {}
+          }
+        } else {
+          showToast('Incorrect Admin PIN');
+          adminPinInput.value = '';
+          adminPinInput.focus();
+        }
+      });
+
+      adminPinInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          document.getElementById('submitAdminPinBtn').click();
+        }
       });
 
       // Channel Modals
       const createChanModal = document.getElementById('createChanModal');
       const newChanNameInput = document.getElementById('newChanNameInput');
       const newChanTopicInput = document.getElementById('newChanTopicInput');
-
-      function openCreateChannelModal() {
-        newChanNameInput.value = '';
-        newChanTopicInput.value = '';
-        createChanModal.classList.remove('hidden');
-        newChanNameInput.focus();
-      }
 
       document.getElementById('addChannelBtn').addEventListener('click', openCreateChannelModal);
       document.getElementById('cancelCreateChanBtn').addEventListener('click', () => createChanModal.classList.add('hidden'));
@@ -1242,8 +1590,12 @@
         document.getElementById('adminUserModal').classList.add('hidden');
       });
       document.getElementById('adminPanelTopBtn').addEventListener('click', () => {
-        const otherKeys = Object.keys(users).filter(k => k !== activePersona);
-        openAdminUserModal(otherKeys[0]);
+        const otherKeys = Object.keys(knownUsers).filter(k => k !== currentUser.id);
+        if (otherKeys.length > 0) {
+          openAdminUserModal(otherKeys[0]);
+        } else {
+          showToast('No other roommates connected yet');
+        }
       });
 
       document.getElementById('toggleOpActionBtn').addEventListener('click', () => {
@@ -1278,6 +1630,7 @@
       document.getElementById('clearChatBtn').addEventListener('click', () => {
         if (currentLocation === 'lobby') return;
         chatHistories[currentLocation] = [];
+        persistState();
         renderChat(currentLocation);
         showToast('Chat window cleared');
       });
@@ -1287,8 +1640,68 @@
       document.getElementById('maximizeBtn').addEventListener('click', () => showToast('Maximized'));
       document.getElementById('closeBtn').addEventListener('click', () => showToast('Client active'));
 
-      // Cross-Tab BroadcastChannel
+      // New User Onboarding Modal Logic
+      const onboardingModal = document.getElementById('onboardingModal');
+      const onboardNickInput = document.getElementById('onboardNickInput');
+      const onboardRoomInput = document.getElementById('onboardRoomInput');
+      const onboardAdminCheckbox = document.getElementById('onboardAdminCheckbox');
+      const onboardPinContainer = document.getElementById('onboardPinContainer');
+      const onboardPinInput = document.getElementById('onboardPinInput');
+      const saveOnboardBtn = document.getElementById('saveOnboardBtn');
+
+      onboardAdminCheckbox.addEventListener('change', () => {
+        if (onboardAdminCheckbox.checked) {
+          onboardPinContainer.classList.remove('hidden');
+          onboardPinInput.focus();
+        } else {
+          onboardPinContainer.classList.add('hidden');
+        }
+      });
+
+      function checkFirstTimeUser() {
+        const saved = localStorage.getItem(STORAGE_KEY_USER);
+        if (!saved) {
+          onboardingModal.classList.remove('hidden');
+          onboardNickInput.focus();
+        }
+      }
+
+      saveOnboardBtn.addEventListener('click', () => {
+        const nick = onboardNickInput.value.trim() || 'Roommate';
+        const room = onboardRoomInput.value.trim() || 'Resident';
+        let isOp = false;
+
+        if (onboardAdminCheckbox.checked) {
+          if (onboardPinInput.value.trim() === adminPinCode) {
+            isOp = true;
+          } else {
+            showToast('Incorrect Admin PIN. Joining as regular member.');
+          }
+        }
+
+        currentUser.nick = nick;
+        currentUser.room = room;
+        currentUser.isOp = isOp;
+        knownUsers[currentUser.id] = currentUser;
+        persistState();
+
+        onboardingModal.classList.add('hidden');
+        updateAdminUiState();
+        showToast(`Welcome to Apartment 404, ${nick}!`);
+
+        if (bc) {
+          try {
+            bc.postMessage({ type: 'user_join', user: currentUser });
+          } catch(e) {}
+        }
+      });
+
+      // Announce presence on network
       if (bc) {
+        try {
+          bc.postMessage({ type: 'user_ping', user: currentUser });
+        } catch(e) {}
+
         bc.onmessage = (e) => {
           const data = e.data;
           if (data.type === 'chat') {
@@ -1300,6 +1713,7 @@
                 text: data.text,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
               });
+              persistState();
             }
             if (currentLocation === data.location) {
               appendMessageElement({
@@ -1312,14 +1726,29 @@
             } else {
               showToast(`New message from ${data.nick} in ${data.location}`);
             }
+          } else if (data.type === 'reaction_update') {
+            if (chatHistories[data.location]) {
+              const msg = chatHistories[data.location].find(m => m.id === data.msgId);
+              if (msg) {
+                msg.likes = data.likes;
+                msg.dislikes = data.dislikes;
+                msg.reactions = data.reactions;
+                persistState();
+                if (currentLocation === data.location) {
+                  renderChat(currentLocation);
+                }
+              }
+            }
           } else if (data.type === 'create_chan') {
             channels[data.id] = { id: data.id, name: data.name, topic: data.topic };
             chatHistories[data.id] = [{ type: 'system', text: `* Channel ${data.name} created by ${data.creator}` }];
+            persistState();
             renderChannelsSidebar();
           } else if (data.type === 'edit_chan') {
             if (channels[data.id]) {
               channels[data.id].name = data.name;
               channels[data.id].topic = data.topic;
+              persistState();
               if (currentLocation === data.id) {
                 document.getElementById('channelNameBadge').textContent = data.name;
                 document.getElementById('channelTopic').textContent = `[${data.topic}]`;
@@ -1330,21 +1759,62 @@
           } else if (data.type === 'delete_chan') {
             delete channels[data.id];
             delete chatHistories[data.id];
+            persistState();
             if (currentLocation === data.id) showLobby();
             renderChannelsSidebar();
+          } else if (data.type === 'user_join' || data.type === 'user_ping') {
+            if (data.user && data.user.id !== currentUser.id) {
+              knownUsers[data.user.id] = data.user;
+              persistState();
+              renderOnlineUsersList();
+              // Reply with own presence if this was a new join
+              if (data.type === 'user_join' && bc) {
+                try {
+                  bc.postMessage({ type: 'user_ping', user: currentUser });
+                } catch(err) {}
+              }
+            }
+          } else if (data.type === 'user_profile_update') {
+            if (data.user) {
+              knownUsers[data.user.id] = data.user;
+              persistState();
+              renderOnlineUsersList();
+            }
           } else if (data.type === 'op_change') {
-            if (users[data.userId]) users[data.userId].isOp = data.isOp;
+            if (knownUsers[data.userId]) {
+              knownUsers[data.userId].isOp = data.isOp;
+              persistState();
+            }
+            if (data.userId === currentUser.id) {
+              currentUser.isOp = data.isOp;
+              persistState();
+              updateAdminUiState();
+            }
             renderOnlineUsersList();
           } else if (data.type === 'ban_change') {
-            if (users[data.userId]) users[data.userId].isBanned = data.isBanned;
+            if (knownUsers[data.userId]) {
+              knownUsers[data.userId].isBanned = data.isBanned;
+              persistState();
+            }
+            if (data.userId === currentUser.id) {
+              currentUser.isBanned = data.isBanned;
+              persistState();
+              showToast('Your account was banned by the House Admin.');
+            }
             renderOnlineUsersList();
+          } else if (data.type === 'kick') {
+            if (data.userId === currentUser.id) {
+              showLobby();
+              showToast(`You were kicked from the room by ${data.admin} (${data.reason})`);
+            }
           }
         };
       }
 
-      // Initial render
+      // Initial render & check
       updateAdminUiState();
       showLobby();
+      checkFirstTimeUser();
     });
   </script>
 </body>
