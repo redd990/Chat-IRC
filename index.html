@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#020617">
   <meta name="application-name" content="Apt404">
-  <title>Apt404 Roommate Messenger (IRC Edition)</title>
+  <title>Apartment 404: Messenger & Vibes</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <!-- MQTT for Cross-Device Real-Time Sync on GitHub Pages -->
@@ -75,6 +75,91 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between p-2 sm:p-4">
 
+  <!-- ============================================== -->
+  <!-- 0. APARTMENT 404 APPS PORTAL (LAUNCHER ON LOAD)  -->
+  <!-- ============================================== -->
+  <div id="appLauncherPortal" class="max-w-4xl w-full mx-auto my-auto p-4 sm:p-6 flex flex-col items-center justify-center font-mono">
+    
+    <div class="text-center mb-6 sm:mb-8">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl mb-3 text-emerald-400 text-2xl font-bold">
+        #
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight">
+        Apartment 404 System Hub
+      </h1>
+      <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-md mx-auto">
+        Select an application to launch. Switch between apps anytime.
+      </p>
+
+      <!-- Active User Card in Portal -->
+      <div id="portalUserCard" class="mt-4 inline-flex items-center gap-3 bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-2 text-xs shadow-lg">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="text-slate-400">Signed in as:</span>
+        <span id="portalUserNick" class="font-bold text-emerald-400">Guest</span>
+        <span id="portalUserRole" class="text-[10px] text-slate-500 bg-slate-800 px-1.5 py-0.5 rounded">Resident</span>
+        <button id="portalSignOutBtn" class="text-slate-500 hover:text-red-400 text-[11px] ml-1" title="Sign out">[Sign out]</button>
+      </div>
+    </div>
+
+    <!-- 2 App Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">
+      
+      <!-- Card 1: Apt404 Messenger -->
+      <div id="launchMessengerBtn" class="bg-slate-900 hover:bg-slate-850 border-2 border-slate-750 hover:border-emerald-500/60 rounded-2xl p-5 cursor-pointer transition-all duration-200 shadow-xl hover:shadow-emerald-950/20 group flex flex-col justify-between min-h-[200px]">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-lg font-bold shadow">
+              <i class="fa-solid fa-comments"></i>
+            </div>
+            <span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-700/40 px-2 py-0.5 rounded-full font-bold">
+              HOUSE CHAT
+            </span>
+          </div>
+          <h2 class="text-lg font-bold text-slate-100 group-hover:text-emerald-400 transition-colors">
+            Apt404 Messenger
+          </h2>
+          <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+            IRC-style household channels, private roommate messaging, like/dislike reactions, and quiet blank lobby.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-emerald-400 font-bold">
+          <span>Launch Messenger</span>
+          <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+        </div>
+      </div>
+
+      <!-- Card 2: Vibes (Lex's Desk & Client Organizer) -->
+      <div id="launchVibesBtn" class="bg-slate-900 hover:bg-slate-850 border-2 border-slate-750 hover:border-purple-500/60 rounded-2xl p-5 cursor-pointer transition-all duration-200 shadow-xl hover:shadow-purple-950/20 group flex flex-col justify-between min-h-[200px]">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/40 text-purple-400 flex items-center justify-center text-lg font-bold shadow">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <span class="text-[10px] bg-purple-950 text-purple-300 border border-purple-700/40 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+              <i class="fa-solid fa-lock text-[9px]"></i> RESTRICTED
+            </span>
+          </div>
+          <h2 class="text-lg font-bold text-slate-100 group-hover:text-purple-400 transition-colors">
+            Vibes
+          </h2>
+          <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+            Client call scratchpad, 3-stage payment pipeline, invoice tracking, and quiet call mode.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-purple-400 font-bold">
+          <span>Open Vibes</span>
+          <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Portal Footer Info -->
+    <div class="text-center text-[11px] text-slate-500 mt-6">
+      Apartment 404 LAN &bull; Real-time cross-device sync active
+    </div>
+  </div>
+
   <!-- Main IRC Client Window -->
   <div id="mainAppWindow" class="max-w-6xl w-full mx-auto irc-window-frame rounded-lg border border-slate-700 overflow-hidden flex flex-col flex-grow shadow-2xl">
     
@@ -84,6 +169,10 @@
         <div class="w-5 h-5 rounded bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 flex items-center justify-center font-mono font-bold text-[11px]">
           #
         </div>
+        <button id="navBackToPortalBtn" class="text-slate-400 hover:text-slate-200 font-mono text-[11px] bg-slate-800 hover:bg-slate-750 border border-slate-700 px-2 py-0.5 rounded flex items-center gap-1 mr-1" title="Return to App Hub">
+          <i class="fa-solid fa-border-all text-[10px]"></i>
+          <span>Apps</span>
+        </button>
         <span class="font-bold text-slate-200 tracking-tight flex items-center gap-1.5">
           <span>Apt404 Messenger</span>
           <span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.2 rounded border border-slate-700 font-mono">LAN ircd</span>
@@ -126,6 +215,10 @@
       </div>
 
       <div class="flex items-center gap-2">
+        <button id="lexCallStatusBtn" class="hidden text-[11px] font-mono px-2 py-0.5 rounded border transition-colors flex items-center gap-1" title="Toggle client call quiet mode">
+          <span id="lexCallStatusDot" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span id="lexCallStatusText">Available</span>
+        </button>
         <button id="switchAdminBtn" class="text-slate-400 hover:text-amber-300 text-[11px] font-mono px-1.5 py-0.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded">
           Unlock Admin
         </button>
@@ -194,6 +287,24 @@
             </div>
           </div>
 
+          <!-- 3. LEX'S BUSINESS HUB (PRIVATE: ONLY VISIBLE TO LEX & ADMIN) -->
+          <div id="lexDeskSidebarSection" class="hidden pt-2 border-t border-slate-800">
+            <div class="text-[11px] font-bold text-purple-400 uppercase tracking-wider px-1 mb-1 font-mono flex items-center justify-between">
+              <span class="flex items-center gap-1.5">
+                <i class="fa-solid fa-briefcase text-purple-400 text-xs"></i>
+                <span>Lex's Desk</span>
+              </span>
+              <span class="text-[9px] bg-purple-950 text-purple-300 border border-purple-700/50 px-1 rounded font-bold">PRIVATE</span>
+            </div>
+            <button id="openLexDeskBtn" class="w-full p-2 bg-gradient-to-r from-purple-950/60 to-slate-900 hover:from-purple-900/70 hover:to-slate-850 border border-purple-500/40 rounded-lg flex items-center justify-between text-xs text-purple-200 transition-colors shadow">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-list text-purple-400"></i>
+                <span class="font-bold">Client Organizer</span>
+              </div>
+              <span id="lexPendingCountBadge" class="text-[10px] bg-purple-900 text-purple-200 px-1.5 py-0.2 rounded-full font-mono font-bold">0</span>
+            </button>
+          </div>
+
         </div>
 
         <!-- Sidebar Footer with Real-Time Cloud Status -->
@@ -252,6 +363,9 @@
               </button>
               <button id="consoleModBtn" class="w-full py-1.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 rounded text-[11px] flex items-center justify-center gap-1.5">
                 <i class="fa-solid fa-users-gear text-[10px]"></i> Roommate Moderation
+              </button>
+              <button id="consoleLexDeskBtn" class="w-full py-1.5 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-500/40 text-purple-300 rounded font-bold text-[11px] flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-briefcase text-[10px]"></i> Open Lex's Desk
               </button>
             </div>
           </div>
@@ -313,6 +427,284 @@
 
       </div>
 
+    </div>
+
+  </div>
+
+    <!-- LEX'S BUSINESS HUB & CLIENT ORGANIZER MODAL (PRIVATE TO LEX & ADMIN) -->
+  <div id="lexDeskModal" class="hidden fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-slate-900 rounded-xl border border-purple-500/50 max-w-3xl w-full max-h-[92vh] flex flex-col font-mono text-xs shadow-2xl overflow-hidden">
+      
+      <!-- Hub Header -->
+      <div class="bg-gradient-to-r from-purple-950 via-slate-900 to-slate-900 p-3.5 border-b border-purple-500/30 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-purple-600/30 text-purple-300 border border-purple-500/50 flex items-center justify-center text-sm shadow">
+            <i class="fa-solid fa-briefcase"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-bold text-sm text-purple-200">Lex's Business Desk &amp; Client Log</h2>
+              <span class="text-[9px] bg-purple-950 text-purple-300 border border-purple-600/50 px-1.5 py-0.2 rounded font-bold">
+                Private: Lex &amp; Admin Only
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400">Manage incoming client calls, track pending requests, and monitor invoices.</p>
+          </div>
+        </div>
+        <button id="closeLexDeskModalBtn" class="text-slate-400 hover:text-white text-lg font-bold px-1.5">×</button>
+      </div>
+
+      <!-- Financial & Job Summary KPI Bar -->
+      <div class="grid grid-cols-3 gap-2 p-3 bg-slate-950 border-b border-slate-800 text-center">
+        <div class="p-2 bg-slate-900 rounded border border-slate-800">
+          <div class="text-[10px] text-slate-400 uppercase font-bold">Active / In Progress</div>
+          <div id="kpiActiveCount" class="text-sm sm:text-base font-bold text-sky-400 mt-0.5">0</div>
+        </div>
+        <div class="p-2 bg-slate-900 rounded border border-slate-800">
+          <div class="text-[10px] text-amber-400 uppercase font-bold">Awaiting Payment</div>
+          <div id="kpiAwaitingAmount" class="text-sm sm:text-base font-bold text-amber-400 mt-0.5">$0.00</div>
+        </div>
+        <div class="p-2 bg-slate-900 rounded border border-slate-800">
+          <div class="text-[10px] text-emerald-400 uppercase font-bold">Paid &amp; Completed</div>
+          <div id="kpiPaidAmount" class="text-sm sm:text-base font-bold text-emerald-400 mt-0.5">$0.00</div>
+        </div>
+      </div>
+
+      <!-- Hub Controls Toolbar -->
+      <div class="p-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between gap-2">
+        <button id="openNewClientJobBtn" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded text-xs flex items-center gap-1.5 shadow transition-colors">
+          <i class="fa-solid fa-plus text-xs"></i>
+          <span>Log Client Call / Task</span>
+        </button>
+
+        <div class="flex items-center gap-2">
+          <span class="text-[11px] text-slate-400 hidden sm:inline">Call Quiet Mode:</span>
+          <button id="modalCallStatusToggleBtn" class="px-2 py-1 bg-slate-800 hover:bg-slate-750 border border-slate-700 rounded text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+            <span id="modalCallDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span id="modalCallLabel">Available</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3-Column Pipeline Workspace -->
+      <div class="flex-grow p-3 overflow-y-auto grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-950">
+        
+        <!-- Column 1: Logged Calls & In Progress -->
+        <div class="bg-slate-900/80 rounded-lg border border-slate-800 flex flex-col overflow-hidden">
+          <div class="p-2 bg-slate-850 border-b border-slate-800 flex items-center justify-between">
+            <span class="font-bold text-sky-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-phone text-xs"></i>
+              <span>Active Calls &amp; Tasks</span>
+            </span>
+            <span id="col1Count" class="text-[10px] bg-sky-950 text-sky-300 px-1.5 py-0.2 rounded font-bold">0</span>
+          </div>
+          <div id="clientColActive" class="p-2 space-y-2 flex-grow overflow-y-auto min-h-[160px]">
+            <!-- Rendered cards -->
+          </div>
+        </div>
+
+        <!-- Column 2: Invoiced (Waiting on Payment) -->
+        <div class="bg-slate-900/80 rounded-lg border border-slate-800 flex flex-col overflow-hidden">
+          <div class="p-2 bg-slate-850 border-b border-slate-800 flex items-center justify-between">
+            <span class="font-bold text-amber-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-file-invoice-dollar text-xs"></i>
+              <span>Invoiced (Pending $)</span>
+            </span>
+            <span id="col2Count" class="text-[10px] bg-amber-950 text-amber-300 px-1.5 py-0.2 rounded font-bold">0</span>
+          </div>
+          <div id="clientColInvoiced" class="p-2 space-y-2 flex-grow overflow-y-auto min-h-[160px]">
+            <!-- Rendered cards -->
+          </div>
+        </div>
+
+        <!-- Column 3: Paid & Completed -->
+        <div class="bg-slate-900/80 rounded-lg border border-slate-800 flex flex-col overflow-hidden">
+          <div class="p-2 bg-slate-850 border-b border-slate-800 flex items-center justify-between">
+            <span class="font-bold text-emerald-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check text-xs"></i>
+              <span>Paid &amp; Done</span>
+            </span>
+            <span id="col3Count" class="text-[10px] bg-emerald-950 text-emerald-300 px-1.5 py-0.2 rounded font-bold">0</span>
+          </div>
+          <div id="clientColPaid" class="p-2 space-y-2 flex-grow overflow-y-auto min-h-[160px]">
+            <!-- Rendered cards -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- LOG / EDIT CLIENT JOB MODAL -->
+  <div id="clientJobEntryModal" class="hidden fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-xl border border-purple-500/50 max-w-sm w-full p-4 font-mono text-xs shadow-2xl">
+      <div class="font-bold text-purple-300 text-sm mb-3 flex items-center gap-2 border-b border-slate-800 pb-2">
+        <i class="fa-solid fa-phone text-purple-400"></i>
+        <span id="clientJobModalTitle">Log New Client Request</span>
+      </div>
+      <div class="space-y-2.5">
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">Client Name / Business:</label>
+          <input type="text" id="jobClientNameInput" placeholder="e.g. Acme Corp, Sarah T." class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-100 focus:outline-none focus:border-purple-500">
+        </div>
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">Request / Call Notes:</label>
+          <textarea id="jobNotesInput" rows="3" placeholder="Called at 2pm - Needs revised invoice &amp; banner by Friday..." class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-100 focus:outline-none focus:border-purple-500 resize-none"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-300 font-bold mb-1">Amount ($):</label>
+            <input type="number" id="jobAmountInput" placeholder="350" step="0.01" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-100 focus:outline-none focus:border-purple-500">
+          </div>
+          <div>
+            <label class="block text-slate-300 font-bold mb-1">Due Date / Target:</label>
+            <input type="text" id="jobDueDateInput" placeholder="Friday / Nov 12" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-100 focus:outline-none focus:border-purple-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">Status:</label>
+          <select id="jobStatusSelect" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200 focus:outline-none focus:border-purple-500">
+            <option value="active">Active Call / In Progress</option>
+            <option value="invoiced">Invoiced (Waiting on $)</option>
+            <option value="paid">Paid &amp; Completed</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 mt-4 pt-2 border-t border-slate-800">
+        <button id="cancelClientJobBtn" class="px-3 py-1 text-slate-400 hover:text-slate-200">Cancel</button>
+        <button id="saveClientJobBtn" class="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded">Save Client Entry</button>
+      </div>
+    </div>
+  </div>
+  <!-- ============================================== -->
+  <!-- 3. STANDALONE VIBES APPLICATION VIEW (SEPARATE APP) -->
+  <!-- ============================================== -->
+  <div id="vibesStandaloneApp" class="hidden max-w-6xl w-full mx-auto irc-window-frame rounded-lg border border-purple-500/40 overflow-hidden flex flex-col flex-grow shadow-2xl">
+    
+    <!-- Vibes Titlebar -->
+    <div class="bg-slate-900 border-b border-slate-800 px-3 py-2 flex items-center justify-between text-xs select-none">
+      <div class="flex items-center gap-2">
+        <button id="vibesBackToPortalBtn" class="text-purple-300 hover:text-white font-mono text-[11px] bg-purple-950/60 hover:bg-purple-900/70 border border-purple-600/40 px-2 py-0.5 rounded flex items-center gap-1 mr-1" title="Return to App Hub">
+          <i class="fa-solid fa-border-all text-[10px]"></i>
+          <span>Apps</span>
+        </button>
+        <div class="w-5 h-5 rounded bg-purple-600/30 text-purple-400 border border-purple-500/40 flex items-center justify-center font-mono font-bold text-[11px]">
+          ✨
+        </div>
+        <span class="font-bold text-purple-200 tracking-tight flex items-center gap-1.5">
+          <span>Vibes</span>
+          <span class="text-[10px] bg-purple-950 text-purple-300 border border-purple-700/50 px-1.5 py-0.2 rounded font-mono font-bold">
+            Client Hub &amp; Pipeline
+          </span>
+        </span>
+      </div>
+
+      <!-- Quick Controls -->
+      <div class="flex items-center gap-3">
+        <button id="vibesCallStatusBtn" class="text-[11px] font-mono px-2 py-0.5 rounded border border-slate-700 bg-slate-800 text-slate-300 flex items-center gap-1 transition-colors" title="Toggle client call quiet mode">
+          <span id="vibesCallDot" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span id="vibesCallText">Available</span>
+        </button>
+
+        <button id="vibesSoundBtn" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 flex items-center gap-1 text-[11px] transition-colors">
+          <i class="fa-solid fa-volume-high text-purple-400"></i>
+          <span>Audio ON</span>
+        </button>
+
+        <div class="flex items-center gap-1">
+          <button id="vibesMinBtn" class="w-4 h-4 bg-slate-800 hover:bg-slate-700 rounded text-[10px] text-slate-400 flex items-center justify-center">_</button>
+          <button id="vibesMaxBtn" class="w-4 h-4 bg-slate-800 hover:bg-slate-700 rounded text-[10px] text-slate-400 flex items-center justify-center">□</button>
+          <button id="vibesCloseBtn" class="w-4 h-4 bg-slate-800 hover:bg-red-800 rounded text-[10px] text-slate-400 hover:text-white flex items-center justify-center">×</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vibes Top User & KPI Bar -->
+    <div class="bg-gradient-to-r from-purple-950/60 via-slate-900 to-slate-900 px-3 py-2 border-b border-purple-500/20 flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">User:</span>
+        <span id="vibesUserDisplay" class="font-bold text-purple-300 bg-purple-950 border border-purple-700/50 px-2 py-0.5 rounded">Lex</span>
+        <span class="text-[10px] text-slate-500">Authorized Operator</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="vibesLogCallBtn" class="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded text-xs flex items-center gap-1.5 shadow transition-colors">
+          <i class="fa-solid fa-plus text-xs"></i>
+          <span>Log Client Call / Task</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- KPI Metrics Strip -->
+    <div class="grid grid-cols-3 gap-2 p-3 bg-slate-950 border-b border-slate-800 text-center font-mono">
+      <div class="p-2 bg-slate-900 rounded border border-slate-800">
+        <div class="text-[10px] text-slate-400 uppercase font-bold">Active / In Progress</div>
+        <div id="vibesKpiActiveCount" class="text-sm sm:text-base font-bold text-sky-400 mt-0.5">0 Active</div>
+      </div>
+      <div class="p-2 bg-slate-900 rounded border border-slate-800">
+        <div class="text-[10px] text-amber-400 uppercase font-bold">Awaiting Payment</div>
+        <div id="vibesKpiAwaitingAmount" class="text-sm sm:text-base font-bold text-amber-400 mt-0.5">$0.00</div>
+      </div>
+      <div class="p-2 bg-slate-900 rounded border border-slate-800">
+        <div class="text-[10px] text-emerald-400 uppercase font-bold">Paid &amp; Completed</div>
+        <div id="vibesKpiPaidAmount" class="text-sm sm:text-base font-bold text-emerald-400 mt-0.5">$0.00</div>
+      </div>
+    </div>
+
+    <!-- 3-Column Pipeline Workspace -->
+    <div class="flex-grow p-3 overflow-y-auto grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-950 font-mono">
+      
+      <!-- Column 1: Active Calls & Requests -->
+      <div class="bg-slate-900/80 rounded-lg border border-slate-800 flex flex-col overflow-hidden">
+        <div class="p-2 bg-slate-850 border-b border-slate-800 flex items-center justify-between">
+          <span class="font-bold text-sky-400 flex items-center gap-1.5 text-xs">
+            <i class="fa-solid fa-phone text-xs"></i>
+            <span>Active Calls &amp; Tasks</span>
+          </span>
+          <span id="vibesCol1Count" class="text-[10px] bg-sky-950 text-sky-300 px-1.5 py-0.2 rounded font-bold">0</span>
+        </div>
+        <div id="vibesColActiveContainer" class="p-2 space-y-2 flex-grow overflow-y-auto min-h-[180px]">
+          <!-- Active job cards -->
+        </div>
+      </div>
+
+      <!-- Column 2: Invoiced (Pending Payment) -->
+      <div class="bg-slate-900/80 rounded-lg border border-slate-800 flex flex-col overflow-hidden">
+        <div class="p-2 bg-slate-850 border-b border-slate-800 flex items-center justify-between">
+          <span class="font-bold text-amber-400 flex items-center gap-1.5 text-xs">
+            <i class="fa-solid fa-file-invoice-dollar text-xs"></i>
+            <span>Invoiced (Pending $)</span>
+          </span>
+          <span id="vibesCol2Count" class="text-[10px] bg-amber-950 text-amber-300 px-1.5 py-0.2 rounded font-bold">0</span>
+        </div>
+        <div id="vibesColInvoicedContainer" class="p-2 space-y-2 flex-grow overflow-y-auto min-h-[180px]">
+          <!-- Invoiced cards -->
+        </div>
+      </div>
+
+      <!-- Column 3: Paid & Completed -->
+      <div class="bg-slate-900/80 rounded-lg border border-slate-800 flex flex-col overflow-hidden">
+        <div class="p-2 bg-slate-850 border-b border-slate-800 flex items-center justify-between">
+          <span class="font-bold text-emerald-400 flex items-center gap-1.5 text-xs">
+            <i class="fa-solid fa-circle-check text-xs"></i>
+            <span>Paid &amp; Done</span>
+          </span>
+          <span id="vibesCol3Count" class="text-[10px] bg-emerald-950 text-emerald-300 px-1.5 py-0.2 rounded font-bold">0</span>
+        </div>
+        <div id="vibesColPaidContainer" class="p-2 space-y-2 flex-grow overflow-y-auto min-h-[180px]">
+          <!-- Paid cards -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Vibes Footer -->
+    <div class="p-2 border-t border-slate-800 text-[10px] font-mono text-slate-500 flex items-center justify-between bg-slate-900">
+      <span>Vibes &bull; Private Business Hub</span>
+      <span class="text-purple-400 font-semibold flex items-center gap-1">
+        <i class="fa-solid fa-shield-halved text-[10px]"></i> Secured (Lex &amp; Admin)
+      </span>
     </div>
 
   </div>
@@ -436,6 +828,25 @@
       <div class="flex justify-end gap-2 mt-4 pt-2 border-t border-slate-800">
         <button id="cancelAdminPinBtn" class="px-3 py-1 text-slate-400 hover:text-slate-200">Cancel</button>
         <button id="submitAdminPinBtn" class="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded">Unlock OP</button>
+      </div>
+    </div>
+  </div>
+
+    <!-- VIBES ACCESS CREDENTIALS MODAL (FOR OTHERS) -->
+  <div id="vibesAccessModal" class="hidden fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 rounded-lg border border-purple-500/50 max-w-xs w-full p-4 font-mono text-xs shadow-2xl">
+      <div class="font-bold text-purple-300 text-sm mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-lock text-purple-400"></i>
+        <span>Vibes Authorization</span>
+      </div>
+      <div class="text-slate-400 text-[11px] mb-3">
+        This app is restricted to Lex and the House Admin. Enter authorization passcode to proceed.
+      </div>
+      <input type="password" id="vibesPasscodeInput" placeholder="Enter PIN..." maxlength="8" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-slate-200 text-center tracking-widest text-sm focus:outline-none focus:border-purple-500">
+      <div id="vibesPasscodeError" class="hidden text-red-400 text-[10px] font-bold mt-2 text-center"></div>
+      <div class="flex justify-end gap-2 mt-4 pt-2 border-t border-slate-800">
+        <button id="cancelVibesAccessBtn" class="px-3 py-1 text-slate-400 hover:text-slate-200">Cancel</button>
+        <button id="submitVibesAccessBtn" class="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded">Unlock</button>
       </div>
     </div>
   </div>
@@ -709,6 +1120,7 @@
 
         renderChannelsSidebar();
         renderOnlineUsersList();
+        updateLexUiState();
       }
 
       // Render Channels in Sidebar
@@ -1604,6 +2016,85 @@
       document.getElementById('dismissAdminModalBtn').addEventListener('click', () => {
         document.getElementById('adminUserModal').classList.add('hidden');
       });
+            // Lex Desk Modal & Controls Listeners
+            // App Portal & Launcher Listeners
+      document.getElementById('launchMessengerBtn').addEventListener('click', showMessengerApp);
+      document.getElementById('launchVibesBtn').addEventListener('click', showVibesApp);
+      document.getElementById('navBackToPortalBtn').addEventListener('click', showPortalView);
+      document.getElementById('vibesBackToPortalBtn').addEventListener('click', showPortalView);
+      document.getElementById('portalSignOutBtn').addEventListener('click', () => {
+        currentUser = null;
+        persistState();
+        showPortalView();
+        showAuthModal('login');
+      });
+
+      // Vibes Access Modal (Credentials for Others)
+      document.getElementById('cancelVibesAccessBtn').addEventListener('click', () => {
+        document.getElementById('vibesAccessModal').classList.add('hidden');
+      });
+      document.getElementById('submitVibesAccessBtn').addEventListener('click', () => {
+        const val = document.getElementById('vibesPasscodeInput').value.trim();
+        if (val === adminPinCode) {
+          vibesUnlockedForSession = true;
+          document.getElementById('vibesAccessModal').classList.add('hidden');
+          launchVibesStandalone();
+          showToast('Vibes access granted');
+        } else {
+          const err = document.getElementById('vibesPasscodeError');
+          err.textContent = 'Invalid authorization passcode.';
+          err.classList.remove('hidden');
+          document.getElementById('vibesPasscodeInput').value = '';
+          document.getElementById('vibesPasscodeInput').focus();
+        }
+      });
+
+      // Vibes Standalone Controls
+      document.getElementById('vibesLogCallBtn').addEventListener('click', openNewLexJobModal);
+      document.getElementById('vibesCallStatusBtn').addEventListener('click', () => {
+        toggleLexCallStatus();
+        const dot = document.getElementById('vibesCallDot');
+        const txt = document.getElementById('vibesCallText');
+        const btn = document.getElementById('vibesCallStatusBtn');
+        if (lexCallActive) {
+          if (dot) dot.className = 'w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse';
+          if (txt) txt.textContent = 'In Client Call';
+          if (btn) btn.className = 'text-[11px] font-mono px-2 py-0.5 rounded border border-red-500/50 bg-red-950/60 text-red-300 font-bold flex items-center gap-1';
+        } else {
+          if (dot) dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500';
+          if (txt) txt.textContent = 'Available';
+          if (btn) btn.className = 'text-[11px] font-mono px-2 py-0.5 rounded border border-slate-700 bg-slate-800 text-slate-300 flex items-center gap-1';
+        }
+      });
+      document.getElementById('vibesSoundBtn').addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        showToast(soundEnabled ? 'Audio ON' : 'Audio MUTED');
+      });
+      document.getElementById('vibesMinBtn').addEventListener('click', () => showToast('Minimized'));
+      document.getElementById('vibesMaxBtn').addEventListener('click', () => showToast('Maximized'));
+      document.getElementById('vibesCloseBtn').addEventListener('click', showPortalView);
+
+      document.getElementById('openLexDeskBtn').addEventListener('click', () => {
+        if (!isLexOrAdmin()) return;
+        renderLexDeskColumns();
+        document.getElementById('lexDeskModal').classList.remove('hidden');
+      });
+      document.getElementById('consoleLexDeskBtn').addEventListener('click', () => {
+        if (!isLexOrAdmin()) return;
+        renderLexDeskColumns();
+        document.getElementById('lexDeskModal').classList.remove('hidden');
+      });
+      document.getElementById('closeLexDeskModalBtn').addEventListener('click', () => {
+        document.getElementById('lexDeskModal').classList.add('hidden');
+      });
+      document.getElementById('openNewClientJobBtn').addEventListener('click', openNewLexJobModal);
+      document.getElementById('cancelClientJobBtn').addEventListener('click', () => {
+        document.getElementById('clientJobEntryModal').classList.add('hidden');
+      });
+      document.getElementById('saveClientJobBtn').addEventListener('click', saveLexJob);
+      document.getElementById('lexCallStatusBtn').addEventListener('click', toggleLexCallStatus);
+      document.getElementById('modalCallStatusToggleBtn').addEventListener('click', toggleLexCallStatus);
+
       document.getElementById('adminPanelTopBtn').addEventListener('click', () => {
         const otherKeys = Object.keys(knownUsers).filter(k => k !== currentUser.id);
         if (otherKeys.length > 0) {
@@ -2036,11 +2527,494 @@
             showToast('Your account was banned by the House Admin.');
           }
           renderOnlineUsersList();
+        } else if (data.type === 'lex_data_sync') {
+          // Strictly only process and save if current user is Lex or Admin
+          if (isLexOrAdmin() && data.jobs) {
+            lexClientJobs = data.jobs;
+            persistLexData();
+            renderLexDeskColumns();
+            renderLexDeskKpi();
+            showToast(`Lex's Desk updated by ${data.senderNick}`);
+          }
+        } else if (data.type === 'lex_call_toggle') {
+          lexCallActive = data.callActive;
+          updateCallStatusUi();
+          if (data.userId && knownUsers[data.userId]) {
+            knownUsers[data.userId].status = data.callActive ? 'busy' : 'online';
+            renderOnlineUsersList();
+          }
+          if (data.statusMsg) {
+            showToast(data.statusMsg);
+          }
         } else if (data.type === 'kick') {
           if (currentUser && data.userId === currentUser.id) {
             showLobby();
             showToast(`You were kicked from the room by ${data.admin} (${data.reason})`);
           }
+        }
+      }
+
+            // ========================================================
+      // LEX'S BUSINESS HUB & CLIENT ORGANIZER (PRIVATE LOGIC)
+      // ========================================================
+      const STORAGE_KEY_LEX_JOBS = 'apt404_lex_client_jobs_v1';
+      let lexClientJobs = [];
+      let lexCallActive = false;
+      let editingJobId = null;
+
+            // ========================================================
+      // PORTAL APP SWITCHER & VIBES STANDALONE APP CONTROLS
+      // ========================================================
+      let currentApp = 'portal'; // 'portal', 'messenger', 'vibes'
+      let vibesUnlockedForSession = false;
+
+      function showPortalView() {
+        currentApp = 'portal';
+        document.getElementById('appLauncherPortal').classList.remove('hidden');
+        document.getElementById('mainAppWindow').classList.add('hidden');
+        document.getElementById('vibesStandaloneApp').classList.add('hidden');
+
+        if (currentUser) {
+          document.getElementById('portalUserNick').textContent = currentUser.nick;
+          document.getElementById('portalUserRole').textContent = currentUser.isOp ? 'Admin (@OP)' : (currentUser.room || 'Resident');
+        } else {
+          document.getElementById('portalUserNick').textContent = 'Guest';
+          document.getElementById('portalUserRole').textContent = 'Signed Out';
+        }
+      }
+
+      function showMessengerApp() {
+        if (!currentUser) {
+          showAuthModal('login');
+          return;
+        }
+        currentApp = 'messenger';
+        document.getElementById('appLauncherPortal').classList.add('hidden');
+        document.getElementById('mainAppWindow').classList.remove('hidden');
+        document.getElementById('vibesStandaloneApp').classList.add('hidden');
+        updateAdminUiState();
+        showLobby();
+      }
+      showPortalView();
+
+      function showVibesApp() {
+        if (!currentUser) {
+          showAuthModal('login');
+          return;
+        }
+
+        // Check credentials: Lex and Admin pass seamlessly!
+        if (isLexOrAdmin() || vibesUnlockedForSession) {
+          launchVibesStandalone();
+        } else {
+          // Others are prompted for credentials
+          document.getElementById('vibesPasscodeInput').value = '';
+          document.getElementById('vibesPasscodeError').classList.add('hidden');
+          document.getElementById('vibesAccessModal').classList.remove('hidden');
+          document.getElementById('vibesPasscodeInput').focus();
+        }
+      }
+
+      function launchVibesStandalone() {
+        currentApp = 'vibes';
+        document.getElementById('appLauncherPortal').classList.add('hidden');
+        document.getElementById('mainAppWindow').classList.add('hidden');
+        document.getElementById('vibesStandaloneApp').classList.remove('hidden');
+        document.getElementById('vibesUserDisplay').textContent = currentUser ? currentUser.nick : 'Lex';
+        renderVibesStandaloneData();
+      }
+
+      function renderVibesStandaloneData() {
+        let activeCount = 0;
+        let awaitingTotal = 0;
+        let paidTotal = 0;
+
+        lexClientJobs.forEach(j => {
+          const amt = parseFloat(j.amount) || 0;
+          if (j.status === 'active') activeCount++;
+          else if (j.status === 'invoiced') awaitingTotal += amt;
+          else if (j.status === 'paid') paidTotal += amt;
+        });
+
+        document.getElementById('vibesKpiActiveCount').textContent = `${activeCount} Active`;
+        document.getElementById('vibesKpiAwaitingAmount').textContent = `$${awaitingTotal.toFixed(2)}`;
+        document.getElementById('vibesKpiPaidAmount').textContent = `$${paidTotal.toFixed(2)}`;
+        document.getElementById('vibesCol1Count').textContent = activeCount;
+        document.getElementById('vibesCol2Count').textContent = lexClientJobs.filter(j => j.status === 'invoiced').length;
+        document.getElementById('vibesCol3Count').textContent = lexClientJobs.filter(j => j.status === 'paid').length;
+
+        const colActive = document.getElementById('vibesColActiveContainer');
+        const colInvoiced = document.getElementById('vibesColInvoicedContainer');
+        const colPaid = document.getElementById('vibesColPaidContainer');
+
+        colActive.innerHTML = '';
+        colInvoiced.innerHTML = '';
+        colPaid.innerHTML = '';
+
+        if (lexClientJobs.length === 0) {
+          colActive.innerHTML = '<div class="text-[11px] text-slate-500 text-center p-4">No active client calls.<br>Click "+ Log Client Call" above.</div>';
+          return;
+        }
+
+        lexClientJobs.forEach(job => {
+          const card = document.createElement('div');
+          card.className = 'p-3 bg-slate-950 border border-slate-800 rounded-lg shadow-sm hover:border-purple-500/50 transition-colors flex flex-col justify-between gap-2';
+
+          const amtFormatted = job.amount ? `$${parseFloat(job.amount).toFixed(2)}` : 'Unbilled';
+          const dueFormatted = job.dueDate ? `Due: ${escapeHtml(job.dueDate)}` : '';
+
+          let actionButtons = '';
+          if (job.status === 'active') {
+            actionButtons = `
+              <button class="mark-invoice-btn text-[10px] bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded font-bold" data-id="${job.id}">
+                &rarr; Mark Invoiced
+              </button>
+            `;
+          } else if (job.status === 'invoiced') {
+            actionButtons = `
+              <button class="mark-paid-btn text-[10px] bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded font-bold" data-id="${job.id}">
+                ✓ Mark Paid ($)
+              </button>
+            `;
+          } else if (job.status === 'paid') {
+            actionButtons = `
+              <span class="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                <i class="fa-solid fa-check"></i> Paid
+              </span>
+            `;
+          }
+
+          card.innerHTML = `
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-100 text-xs">${escapeHtml(job.clientName)}</span>
+                <span class="font-bold text-xs text-emerald-400 font-mono">${amtFormatted}</span>
+              </div>
+              <div class="text-[11px] text-slate-300 mt-1 whitespace-pre-wrap">${escapeHtml(job.notes)}</div>
+              ${dueFormatted ? `<div class="text-[10px] text-slate-500 font-mono mt-1">${dueFormatted}</div>` : ''}
+            </div>
+            <div class="pt-2 border-t border-slate-900 flex items-center justify-between">
+              <div class="flex items-center gap-1">
+                <button class="edit-job-btn text-[11px] text-slate-400 hover:text-purple-300 px-1" data-id="${job.id}" title="Edit entry">✎</button>
+                <button class="del-job-btn text-[11px] text-slate-500 hover:text-red-400 px-1" data-id="${job.id}" title="Delete entry">×</button>
+              </div>
+              <div>${actionButtons}</div>
+            </div>
+          `;
+
+          card.querySelector('.del-job-btn').addEventListener('click', () => {
+            deleteLexJob(job.id);
+            renderVibesStandaloneData();
+          });
+          card.querySelector('.edit-job-btn').addEventListener('click', () => openEditLexJobModal(job.id));
+
+          const invBtn = card.querySelector('.mark-invoice-btn');
+          if (invBtn) invBtn.addEventListener('click', () => {
+            updateLexJobStatus(job.id, 'invoiced');
+            renderVibesStandaloneData();
+          });
+
+          const paidBtn = card.querySelector('.mark-paid-btn');
+          if (paidBtn) paidBtn.addEventListener('click', () => {
+            updateLexJobStatus(job.id, 'paid');
+            renderVibesStandaloneData();
+          });
+
+          if (job.status === 'active') colActive.appendChild(card);
+          else if (job.status === 'invoiced') colInvoiced.appendChild(card);
+          else if (job.status === 'paid') colPaid.appendChild(card);
+        });
+      }
+
+      function isLexOrAdmin() {
+        if (!currentUser) return false;
+        const nick = (currentUser.nick || '').toLowerCase();
+        return currentUser.isOp || nick === 'lex';
+      }
+
+      function loadLexData() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY_LEX_JOBS);
+          if (saved) {
+            lexClientJobs = JSON.parse(saved);
+          }
+        } catch(e) {}
+      }
+
+      function persistLexData() {
+        try {
+          localStorage.setItem(STORAGE_KEY_LEX_JOBS, JSON.stringify(lexClientJobs));
+        } catch(e) {}
+      }
+
+      loadLexData();
+
+      function updateLexUiState() {
+        const canAccess = isLexOrAdmin();
+        const lexSidebar = document.getElementById('lexDeskSidebarSection');
+        const lexConsoleBtn = document.getElementById('consoleLexDeskBtn');
+        const lexCallStatusBtn = document.getElementById('lexCallStatusBtn');
+
+        if (canAccess) {
+          if (lexSidebar) lexSidebar.classList.remove('hidden');
+          if (lexConsoleBtn) lexConsoleBtn.classList.remove('hidden');
+          if (lexCallStatusBtn) {
+            lexCallStatusBtn.classList.remove('hidden');
+            updateCallStatusUi();
+          }
+          renderLexDeskKpi();
+        } else {
+          if (lexSidebar) lexSidebar.classList.add('hidden');
+          if (lexConsoleBtn) lexConsoleBtn.classList.add('hidden');
+          if (lexCallStatusBtn) lexCallStatusBtn.classList.add('hidden');
+        }
+      }
+
+      function updateCallStatusUi() {
+        const dot = document.getElementById('lexCallStatusDot');
+        const txt = document.getElementById('lexCallStatusText');
+        const btn = document.getElementById('lexCallStatusBtn');
+        const modalDot = document.getElementById('modalCallDot');
+        const modalTxt = document.getElementById('modalCallLabel');
+
+        if (lexCallActive) {
+          if (dot) dot.className = 'w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse';
+          if (txt) txt.textContent = 'In Client Call';
+          if (btn) btn.className = 'text-[11px] font-mono px-2 py-0.5 rounded border border-red-500/50 bg-red-950/60 text-red-300 font-bold flex items-center gap-1';
+          if (modalDot) modalDot.className = 'w-2 h-2 rounded-full bg-red-500 animate-pulse';
+          if (modalTxt) modalTxt.textContent = 'In Client Call (Quiet)';
+        } else {
+          if (dot) dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500';
+          if (txt) txt.textContent = 'Available';
+          if (btn) btn.className = 'text-[11px] font-mono px-2 py-0.5 rounded border border-slate-700 bg-slate-800 text-slate-300 flex items-center gap-1';
+          if (modalDot) modalDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+          if (modalTxt) modalTxt.textContent = 'Available';
+        }
+      }
+
+      function toggleLexCallStatus() {
+        lexCallActive = !lexCallActive;
+        updateCallStatusUi();
+        const statusMsg = lexCallActive ? '🔴 Lex is currently in a client call (quiet hours requested)' : '🟢 Lex finished client call';
+        showToast(lexCallActive ? 'Client call quiet mode: ON' : 'Client call quiet mode: OFF');
+
+        if (currentUser) {
+          currentUser.status = lexCallActive ? 'busy' : 'online';
+          currentUser.callNote = lexCallActive ? 'In Client Call' : '';
+          knownUsers[currentUser.id] = currentUser;
+          persistState();
+          renderOnlineUsersList();
+        }
+
+        sendNetworkEvent({
+          type: 'lex_call_toggle',
+          callActive: lexCallActive,
+          statusMsg: statusMsg,
+          userId: currentUser ? currentUser.id : null
+        });
+      }
+
+      function renderLexDeskKpi() {
+        let activeCount = 0;
+        let awaitingTotal = 0;
+        let paidTotal = 0;
+
+        lexClientJobs.forEach(j => {
+          const amt = parseFloat(j.amount) || 0;
+          if (j.status === 'active') activeCount++;
+          else if (j.status === 'invoiced') awaitingTotal += amt;
+          else if (j.status === 'paid') paidTotal += amt;
+        });
+
+        document.getElementById('lexPendingCountBadge').textContent = activeCount;
+        document.getElementById('kpiActiveCount').textContent = `${activeCount} Active`;
+        document.getElementById('kpiAwaitingAmount').textContent = `$${awaitingTotal.toFixed(2)}`;
+        document.getElementById('kpiPaidAmount').textContent = `$${paidTotal.toFixed(2)}`;
+        document.getElementById('col1Count').textContent = activeCount;
+        document.getElementById('col2Count').textContent = lexClientJobs.filter(j => j.status === 'invoiced').length;
+        document.getElementById('col3Count').textContent = lexClientJobs.filter(j => j.status === 'paid').length;
+      }
+
+      function renderLexDeskColumns() {
+        if (!isLexOrAdmin()) return;
+
+        const colActive = document.getElementById('clientColActive');
+        const colInvoiced = document.getElementById('clientColInvoiced');
+        const colPaid = document.getElementById('clientColPaid');
+
+        colActive.innerHTML = '';
+        colInvoiced.innerHTML = '';
+        colPaid.innerHTML = '';
+
+        renderLexDeskKpi();
+
+        if (lexClientJobs.length === 0) {
+          colActive.innerHTML = '<div class="text-[11px] text-slate-500 text-center p-3">No client calls logged yet.<br>Click "+ Log Client Call" above.</div>';
+          return;
+        }
+
+        lexClientJobs.forEach(job => {
+          const card = document.createElement('div');
+          card.className = 'p-2.5 bg-slate-950 border border-slate-800 rounded-lg shadow-sm hover:border-purple-500/50 transition-colors flex flex-col justify-between gap-1.5';
+
+          const amtFormatted = job.amount ? `$${parseFloat(job.amount).toFixed(2)}` : 'Unbilled';
+          const dueFormatted = job.dueDate ? `Due: ${escapeHtml(job.dueDate)}` : '';
+
+          let actionButtons = '';
+          if (job.status === 'active') {
+            actionButtons = `
+              <button class="mark-invoice-btn text-[10px] bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded font-bold" data-id="${job.id}">
+                &rarr; Mark Invoiced
+              </button>
+            `;
+          } else if (job.status === 'invoiced') {
+            actionButtons = `
+              <button class="mark-paid-btn text-[10px] bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded font-bold" data-id="${job.id}">
+                ✓ Mark Paid ($)
+              </button>
+            `;
+          } else if (job.status === 'paid') {
+            actionButtons = `
+              <span class="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                <i class="fa-solid fa-check"></i> Paid
+              </span>
+            `;
+          }
+
+          card.innerHTML = `
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-100 text-xs">${escapeHtml(job.clientName)}</span>
+                <span class="font-bold text-[11px] text-emerald-400 font-mono">${amtFormatted}</span>
+              </div>
+              <div class="text-[11px] text-slate-300 mt-1 whitespace-pre-wrap">${escapeHtml(job.notes)}</div>
+              ${dueFormatted ? `<div class="text-[10px] text-slate-500 font-mono mt-1">${dueFormatted}</div>` : ''}
+            </div>
+            <div class="pt-1.5 border-t border-slate-900 flex items-center justify-between">
+              <div class="flex items-center gap-1">
+                <button class="edit-job-btn text-[10px] text-slate-400 hover:text-purple-300 px-1" data-id="${job.id}" title="Edit entry">✎</button>
+                <button class="del-job-btn text-[10px] text-slate-500 hover:text-red-400 px-1" data-id="${job.id}" title="Delete entry">×</button>
+              </div>
+              <div>${actionButtons}</div>
+            </div>
+          `;
+
+          card.querySelector('.del-job-btn').addEventListener('click', () => deleteLexJob(job.id));
+          card.querySelector('.edit-job-btn').addEventListener('click', () => openEditLexJobModal(job.id));
+
+          const invBtn = card.querySelector('.mark-invoice-btn');
+          if (invBtn) invBtn.addEventListener('click', () => updateLexJobStatus(job.id, 'invoiced'));
+
+          const paidBtn = card.querySelector('.mark-paid-btn');
+          if (paidBtn) paidBtn.addEventListener('click', () => updateLexJobStatus(job.id, 'paid'));
+
+          if (job.status === 'active') colActive.appendChild(card);
+          else if (job.status === 'invoiced') colInvoiced.appendChild(card);
+          else if (job.status === 'paid') colPaid.appendChild(card);
+        });
+      }
+
+      function openNewLexJobModal() {
+        if (!isLexOrAdmin()) return;
+        editingJobId = null;
+        document.getElementById('clientJobModalTitle').textContent = 'Log New Client Request';
+        document.getElementById('jobClientNameInput').value = '';
+        document.getElementById('jobNotesInput').value = '';
+        document.getElementById('jobAmountInput').value = '';
+        document.getElementById('jobDueDateInput').value = '';
+        document.getElementById('jobStatusSelect').value = 'active';
+        document.getElementById('clientJobEntryModal').classList.remove('hidden');
+        document.getElementById('jobClientNameInput').focus();
+      }
+
+      function openEditLexJobModal(jobId) {
+        if (!isLexOrAdmin()) return;
+        const job = lexClientJobs.find(j => j.id === jobId);
+        if (!job) return;
+        editingJobId = jobId;
+        document.getElementById('clientJobModalTitle').textContent = 'Edit Client Entry';
+        document.getElementById('jobClientNameInput').value = job.clientName;
+        document.getElementById('jobNotesInput').value = job.notes;
+        document.getElementById('jobAmountInput').value = job.amount || '';
+        document.getElementById('jobDueDateInput').value = job.dueDate || '';
+        document.getElementById('jobStatusSelect').value = job.status;
+        document.getElementById('clientJobEntryModal').classList.remove('hidden');
+      }
+
+      function saveLexJob() {
+        const clientName = document.getElementById('jobClientNameInput').value.trim();
+        const notes = document.getElementById('jobNotesInput').value.trim();
+        const amount = document.getElementById('jobAmountInput').value.trim();
+        const dueDate = document.getElementById('jobDueDateInput').value.trim();
+        const status = document.getElementById('jobStatusSelect').value;
+
+        if (!clientName) {
+          showToast('Please enter a client name');
+          return;
+        }
+
+        if (editingJobId) {
+          const job = lexClientJobs.find(j => j.id === editingJobId);
+          if (job) {
+            job.clientName = clientName;
+            job.notes = notes;
+            job.amount = amount;
+            job.dueDate = dueDate;
+            job.status = status;
+          }
+        } else {
+          lexClientJobs.unshift({
+            id: 'job_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+            clientName,
+            notes,
+            amount,
+            dueDate,
+            status,
+            createdAt: new Date().toLocaleDateString()
+          });
+        }
+
+        persistLexData();
+        renderLexDeskColumns();
+        renderVibesStandaloneData();
+        document.getElementById('clientJobEntryModal').classList.add('hidden');
+        showToast('Client job saved');
+
+        sendNetworkEvent({
+          type: 'lex_data_sync',
+          jobs: lexClientJobs,
+          senderNick: currentUser ? currentUser.nick : 'Lex'
+        });
+      }
+
+      function deleteLexJob(jobId) {
+        lexClientJobs = lexClientJobs.filter(j => j.id !== jobId);
+        persistLexData();
+        renderLexDeskColumns();
+        showToast('Client entry removed');
+        sendNetworkEvent({
+          type: 'lex_data_sync',
+          jobs: lexClientJobs,
+          senderNick: currentUser ? currentUser.nick : 'Lex'
+        });
+      }
+
+      function updateLexJobStatus(jobId, newStatus) {
+        const job = lexClientJobs.find(j => j.id === jobId);
+        if (job) {
+          job.status = newStatus;
+          persistLexData();
+          renderLexDeskColumns();
+          if (newStatus === 'paid') {
+            showToast(`🎉 Payment recorded for ${job.clientName}!`);
+          } else {
+            showToast(`Status updated to ${newStatus}`);
+          }
+          sendNetworkEvent({
+            type: 'lex_data_sync',
+            jobs: lexClientJobs,
+            senderNick: currentUser ? currentUser.nick : 'Lex'
+          });
         }
       }
 
@@ -2141,6 +3115,7 @@
         updateAdminUiState();
         showLobby();
       }
+      showPortalView();
       initRealtimeNetworking();
     });
   </script>
