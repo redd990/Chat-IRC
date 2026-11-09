@@ -11,6 +11,8 @@
   <title>Apt404 Roommate Messenger (IRC Edition)</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <!-- MQTT for Cross-Device Real-Time Sync on GitHub Pages -->
+  <script src="https://unpkg.com/mqtt@5.3.5/dist/mqtt.min.js"></script>
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
@@ -194,11 +196,12 @@
 
         </div>
 
-        <!-- Sidebar Footer -->
+        <!-- Sidebar Footer with Real-Time Cloud Status -->
         <div class="p-2 border-t border-slate-800 text-[10px] font-mono text-slate-500 flex items-center justify-between">
           <span>apt404.local:6667</span>
-          <span class="text-emerald-500 font-semibold flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Connected
+          <span id="connStatusIndicator" class="text-emerald-400 font-semibold flex items-center gap-1">
+            <span id="connStatusDot" class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="connStatusText">Live Relay</span>
           </span>
         </div>
 
@@ -882,17 +885,13 @@
         document.getElementById('editChanModal').classList.add('hidden');
         showToast(`Channel ${newName} updated`);
 
-        if (bc) {
-          try {
-            bc.postMessage({
-              type: 'edit_chan',
+        sendNetworkEvent({
+          type: 'edit_chan',
               id: editingChanId,
               name: newName,
               topic: channels[editingChanId].topic,
               admin: currentUser.nick
             });
-          } catch(e) {}
-        }
         editingChanId = null;
       }
 
@@ -922,11 +921,7 @@
         renderChannelsSidebar();
         showToast(`Created channel ${cleanName}`);
 
-        if (bc) {
-          try {
-            bc.postMessage({ type: 'create_chan', id, name: cleanName, topic: channels[id].topic, creator: currentUser.nick });
-          } catch(e) {}
-        }
+        sendNetworkEvent({ type: 'create_chan', id, name: cleanName, topic: channels[id].topic, creator: currentUser.nick });
 
         openChannel(id);
       }
@@ -949,11 +944,7 @@
         renderChannelsSidebar();
         showToast(`Channel ${name} removed`);
 
-        if (bc) {
-          try {
-            bc.postMessage({ type: 'delete_chan', id: chanId, name, admin: currentUser.nick });
-          } catch(e) {}
-        }
+        sendNetworkEvent({ type: 'delete_chan', id: chanId, name, admin: currentUser.nick });
       }
 
       // Admin User Modal Controls
@@ -1010,11 +1001,7 @@
         renderOnlineUsersList();
         openAdminUserModal(userId);
 
-        if (bc) {
-          try {
-            bc.postMessage({ type: 'op_change', userId, isOp: u.isOp, admin: currentUser.nick });
-          } catch(e) {}
-        }
+        sendNetworkEvent({ type: 'op_change', userId, isOp: u.isOp, admin: currentUser.nick });
       }
 
       // Kick User
@@ -1029,11 +1016,7 @@
         showToast(`Kicked ${u.nick}`);
         document.getElementById('adminUserModal').classList.add('hidden');
 
-        if (bc) {
-          try {
-            bc.postMessage({ type: 'kick', userId, reason: reason || 'Rule violation', admin: currentUser.nick });
-          } catch(e) {}
-        }
+        sendNetworkEvent({ type: 'kick', userId, reason: reason || 'Rule violation', admin: currentUser.nick });
       }
 
       // Ban / Unban User
@@ -1058,11 +1041,7 @@
         renderOnlineUsersList();
         openAdminUserModal(userId);
 
-        if (bc) {
-          try {
-            bc.postMessage({ type: 'ban_change', userId, isBanned: u.isBanned, admin: currentUser.nick });
-          } catch(e) {}
-        }
+        sendNetworkEvent({ type: 'ban_change', userId, isBanned: u.isBanned, admin: currentUser.nick });
       }
 
       // View Switching: Lobby Directory vs Active Chat
@@ -1238,18 +1217,14 @@
         persistState();
         renderChat(currentLocation);
 
-        if (bc) {
-          try {
-            bc.postMessage({
-              type: 'reaction_update',
+        sendNetworkEvent({
+          type: 'reaction_update',
               location: currentLocation,
               msgId: msgId,
               likes: msg.likes,
               dislikes: msg.dislikes,
               reactions: msg.reactions
             });
-          } catch(e) {}
-        }
       }
 
       // Send Message / Command Handler
@@ -1289,17 +1264,20 @@
 
         playMessageTone();
 
-        if (bc) {
-          try {
-            bc.postMessage({
-              type: 'chat',
-              location: currentLocation,
-              nick: currentUser.nick,
-              isOp: currentUser.isOp,
-              text: text
-            });
-          } catch(e) {}
-        }
+        sendNetworkEvent({
+          type: 'chat',
+          location: currentLocation,
+          msg: {
+            id: ('msg_' + Date.now() + '_' + Math.random().toString(36).substring(2,6)),
+            nick: currentUser.nick,
+            isOp: currentUser.isOp,
+            text: text,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            likes: 0,
+            dislikes: 0,
+            reactions: {}
+          }
+        });
       }
 
       function handleCommand(cmd) {
@@ -1486,11 +1464,7 @@
           if (currentLocation !== 'lobby') {
             appendMessageElement({ type: 'system', text: `* ${currentUser.nick} unlocked Operator permissions (@OP)` });
           }
-          if (bc) {
-            try {
-              bc.postMessage({ type: 'op_change', userId: currentUser.id, isOp: true, admin: currentUser.nick });
-            } catch(e) {}
-          }
+          sendNetworkEvent({ type: 'op_change', userId: currentUser.id, isOp: true, admin: currentUser.nick });
         } else {
           showToast('Incorrect Admin PIN');
           adminPinInput.value = '';
@@ -1814,11 +1788,8 @@
         showLobby();
         showToast(`Welcome to Apartment 404, ${username}!`);
 
-        if (bc) {
-          try {
-            bc.postMessage({ type: 'user_join', user: currentUser });
-          } catch(e) {}
-        }
+        sendNetworkEvent({ type: 'user_join', user: currentUser });
+        sendNetworkEvent({ type: 'sync_request', requesterId: currentUser.id });
       });
 
       // Submit Login
@@ -1856,11 +1827,8 @@
         showLobby();
         showToast(`Welcome back, ${currentUser.nick}!`);
 
-        if (bc) {
-          try {
-            bc.postMessage({ type: 'user_join', user: currentUser });
-          } catch(e) {}
-        }
+        sendNetworkEvent({ type: 'user_join', user: currentUser });
+        sendNetworkEvent({ type: 'sync_request', requesterId: currentUser.id });
       });
 
       [regUsernameInput, regPasswordInput, regConfirmPasswordInput, regRoomInput, regPinInput].forEach(inp => {
@@ -1875,112 +1843,295 @@
         });
       });
 
-      // Network Broadcast & Presence Listener
-      if (bc) {
+      // ========================================================
+      // CROSS-DEVICE REAL-TIME CLOUD RELAY & PRESENCE (MQTT + BC)
+      // ========================================================
+      const HOUSE_CHANNEL_TOPIC = 'apt404_household_redd990_v2';
+      let mqttClient = null;
+      let presenceHeartbeatInterval = null;
+
+      function sendNetworkEvent(data) {
+        if (!data) return;
         if (currentUser) {
-          try {
-            bc.postMessage({ type: 'user_ping', user: currentUser });
-          } catch(e) {}
+          data.senderId = currentUser.id;
+          data.senderNick = currentUser.nick;
+        }
+        data.timestamp = data.timestamp || Date.now();
+
+        // 1. Same-device cross-tab sync
+        if (bc) {
+          try { bc.postMessage(data); } catch(e) {}
         }
 
-        bc.onmessage = (e) => {
-          const data = e.data;
-          if (data.type === 'chat') {
-            if (data.location && chatHistories[data.location]) {
-              chatHistories[data.location].push({
-                type: 'msg',
-                nick: data.nick,
-                isOp: data.isOp,
-                text: data.text,
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-              });
+        // 2. Cross-device internet sync via secure WebSocket broker
+        if (mqttClient && mqttClient.connected) {
+          try {
+            mqttClient.publish(HOUSE_CHANNEL_TOPIC, JSON.stringify(data));
+          } catch(e) {}
+        }
+      }
+
+      function handleIncomingNetworkEvent(data) {
+        if (!data) return;
+        // Ignore events sent by self (already processed locally)
+        if (currentUser && data.senderId === currentUser.id && data.type !== 'sync_request') return;
+
+        if (data.type === 'chat') {
+          let targetBuffer = data.location;
+          // Handle private 1-on-1 direct messaging buffer mapping & isolation
+          if (data.location && data.location.startsWith('pm_')) {
+            const targetUserId = data.location.replace('pm_', '');
+            if (currentUser && targetUserId === currentUser.id) {
+              // Message was sent TO us: local buffer is pm_<senderId>
+              targetBuffer = `pm_${data.senderId}`;
+            } else if (currentUser && data.senderId === currentUser.id) {
+              // Message was sent BY us on another tab/session
+              targetBuffer = data.location;
+            } else {
+              // Message is private between two other roommates: ignore
+              return;
+            }
+          }
+
+          if (targetBuffer && chatHistories[targetBuffer]) {
+            const existing = chatHistories[targetBuffer].find(m => m.id === data.msg.id);
+            if (!existing) {
+              chatHistories[targetBuffer].push(data.msg);
               persistState();
             }
-            if (currentLocation === data.location) {
-              appendMessageElement({
-                type: 'msg',
-                nick: data.nick,
-                isOp: data.isOp,
-                text: data.text
-              }, false);
-              playMessageTone();
+          } else if (targetBuffer && !chatHistories[targetBuffer]) {
+            chatHistories[targetBuffer] = [data.msg];
+            persistState();
+          }
+
+          if (currentLocation === targetBuffer) {
+            appendMessageElement(data.msg, false);
+            playMessageTone();
+          } else {
+            const roomLabel = targetBuffer.startsWith('pm_') ? `Private Message from ${data.msg.nick}` : targetBuffer;
+            showToast(`New message from ${data.msg.nick} in ${roomLabel}`);
+          }
+        } else if (data.type === 'reaction_update') {
+          let targetBuffer = data.location;
+          if (data.location && data.location.startsWith('pm_')) {
+            const targetUserId = data.location.replace('pm_', '');
+            if (currentUser && targetUserId === currentUser.id) {
+              targetBuffer = `pm_${data.senderId}`;
+            } else if (currentUser && data.senderId === currentUser.id) {
+              targetBuffer = data.location;
             } else {
-              showToast(`New message from ${data.nick} in ${data.location}`);
+              return;
             }
-          } else if (data.type === 'reaction_update') {
-            if (chatHistories[data.location]) {
-              const msg = chatHistories[data.location].find(m => m.id === data.msgId);
-              if (msg) {
-                msg.likes = data.likes;
-                msg.dislikes = data.dislikes;
-                msg.reactions = data.reactions;
-                persistState();
-                if (currentLocation === data.location) {
-                  renderChat(currentLocation);
-                }
+          }
+
+          if (chatHistories[targetBuffer]) {
+            const msg = chatHistories[targetBuffer].find(m => m.id === data.msgId);
+            if (msg) {
+              msg.likes = data.likes;
+              msg.dislikes = data.dislikes;
+              msg.reactions = data.reactions;
+              persistState();
+              if (currentLocation === targetBuffer) {
+                renderChat(currentLocation);
               }
             }
-          } else if (data.type === 'create_chan') {
+          }
+        } else if (data.type === 'create_chan') {
+          if (!channels[data.id]) {
             channels[data.id] = { id: data.id, name: data.name, topic: data.topic };
             chatHistories[data.id] = [{ type: 'system', text: `* Channel ${data.name} created by ${data.creator}` }];
             persistState();
             renderChannelsSidebar();
-          } else if (data.type === 'edit_chan') {
-            if (channels[data.id]) {
-              channels[data.id].name = data.name;
-              channels[data.id].topic = data.topic;
-              persistState();
-              if (currentLocation === data.id) {
-                document.getElementById('channelNameBadge').textContent = data.name;
-                document.getElementById('channelTopic').textContent = `[${data.topic}]`;
-                appendMessageElement({ type: 'system', text: `* Channel settings updated by ${data.admin}: ${data.name} - "${data.topic}"` }, false);
-              }
-              renderChannelsSidebar();
+            showToast(`New channel ${data.name} added`);
+          }
+        } else if (data.type === 'edit_chan') {
+          if (channels[data.id]) {
+            channels[data.id].name = data.name;
+            channels[data.id].topic = data.topic;
+            persistState();
+            if (currentLocation === data.id) {
+              document.getElementById('channelNameBadge').textContent = data.name;
+              document.getElementById('channelTopic').textContent = `[${data.topic}]`;
+              appendMessageElement({ type: 'system', text: `* Channel settings updated by ${data.admin}: ${data.name} - "${data.topic}"` }, false);
             }
-          } else if (data.type === 'delete_chan') {
+            renderChannelsSidebar();
+          }
+        } else if (data.type === 'delete_chan') {
+          if (channels[data.id]) {
             delete channels[data.id];
             delete chatHistories[data.id];
             persistState();
             if (currentLocation === data.id) showLobby();
             renderChannelsSidebar();
-          } else if (data.type === 'user_join' || data.type === 'user_ping') {
-            if (data.user && currentUser && data.user.id !== currentUser.id) {
-              knownUsers[data.user.id] = data.user;
-              renderOnlineUsersList();
-              if (data.type === 'user_join' && bc) {
-                try {
-                  bc.postMessage({ type: 'user_ping', user: currentUser });
-                } catch(err) {}
+            showToast(`Channel ${data.name} deleted`);
+          }
+        } else if (data.type === 'user_join' || data.type === 'user_ping') {
+          if (data.user && currentUser && data.user.id !== currentUser.id) {
+            data.user.lastSeen = Date.now();
+            knownUsers[data.user.id] = data.user;
+            renderOnlineUsersList();
+
+            // When another user joins or pings, reply so they discover us immediately
+            if (data.type === 'user_join') {
+              sendNetworkEvent({ type: 'user_ping', user: currentUser });
+              // If we have channels and the joining user might not, send current channels
+              if (Object.keys(channels).length > 0) {
+                sendNetworkEvent({
+                  type: 'sync_response',
+                  targetId: data.user.id,
+                  channels: channels
+                });
               }
             }
-          } else if (data.type === 'op_change') {
-            if (knownUsers[data.userId]) {
-              knownUsers[data.userId].isOp = data.isOp;
-            }
-            if (currentUser && data.userId === currentUser.id) {
-              currentUser.isOp = data.isOp;
-              persistState();
-              updateAdminUiState();
-            }
+          }
+        } else if (data.type === 'user_leave') {
+          if (data.userId && knownUsers[data.userId]) {
+            delete knownUsers[data.userId];
             renderOnlineUsersList();
-          } else if (data.type === 'ban_change') {
-            if (knownUsers[data.userId]) {
-              knownUsers[data.userId].isBanned = data.isBanned;
-            }
-            if (currentUser && data.userId === currentUser.id) {
-              currentUser.isBanned = data.isBanned;
+          }
+        } else if (data.type === 'sync_request') {
+          // If we have channels, reply with our channel list
+          if (Object.keys(channels).length > 0) {
+            sendNetworkEvent({
+              type: 'sync_response',
+              targetId: data.requesterId,
+              channels: channels
+            });
+          }
+        } else if (data.type === 'sync_response') {
+          if (data.targetId === currentUser.id && data.channels) {
+            let updated = false;
+            Object.keys(data.channels).forEach(k => {
+              if (!channels[k]) {
+                channels[k] = data.channels[k];
+                if (!chatHistories[k]) {
+                  chatHistories[k] = [{ type: 'system', text: `* Channel ${channels[k].name} synced from house network` }];
+                }
+                updated = true;
+              }
+            });
+            if (updated) {
               persistState();
-              showToast('Your account was banned by the House Admin.');
-            }
-            renderOnlineUsersList();
-          } else if (data.type === 'kick') {
-            if (currentUser && data.userId === currentUser.id) {
-              showLobby();
-              showToast(`You were kicked from the room by ${data.admin} (${data.reason})`);
+              renderChannelsSidebar();
+              showToast('House channels synced!');
             }
           }
-        };
+        } else if (data.type === 'op_change') {
+          if (knownUsers[data.userId]) {
+            knownUsers[data.userId].isOp = data.isOp;
+          }
+          if (currentUser && data.userId === currentUser.id) {
+            currentUser.isOp = data.isOp;
+            persistState();
+            updateAdminUiState();
+          }
+          renderOnlineUsersList();
+        } else if (data.type === 'ban_change') {
+          if (knownUsers[data.userId]) {
+            knownUsers[data.userId].isBanned = data.isBanned;
+          }
+          if (currentUser && data.userId === currentUser.id) {
+            currentUser.isBanned = data.isBanned;
+            persistState();
+            showToast('Your account was banned by the House Admin.');
+          }
+          renderOnlineUsersList();
+        } else if (data.type === 'kick') {
+          if (currentUser && data.userId === currentUser.id) {
+            showLobby();
+            showToast(`You were kicked from the room by ${data.admin} (${data.reason})`);
+          }
+        }
       }
+
+      function initRealtimeNetworking() {
+        // 1. Setup local BroadcastChannel
+        if (bc) {
+          bc.onmessage = (e) => {
+            handleIncomingNetworkEvent(e.data);
+          };
+        }
+
+        // 2. Setup MQTT WebSocket client for cross-device internet communication
+        if (typeof mqtt !== 'undefined') {
+          try {
+            const brokerUrl = 'wss://broker.emqx.io:8084/mqtt';
+            const clientId = 'apt404_' + Math.random().toString(36).substring(2, 10);
+            mqttClient = mqtt.connect(brokerUrl, {
+              clientId: clientId,
+              clean: true,
+              reconnectPeriod: 2500,
+              connectTimeout: 6000
+            });
+
+            mqttClient.on('connect', () => {
+              mqttClient.subscribe(HOUSE_CHANNEL_TOPIC, { qos: 0 });
+              const connText = document.getElementById('connStatusText');
+              const connDot = document.getElementById('connStatusDot');
+              if (connText && connDot) {
+                connText.textContent = 'Live Cloud';
+                connDot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse';
+              }
+              if (currentUser) {
+                sendNetworkEvent({ type: 'user_join', user: currentUser });
+                sendNetworkEvent({ type: 'sync_request', requesterId: currentUser.id });
+              }
+            });
+
+            mqttClient.on('offline', () => {
+              const connText = document.getElementById('connStatusText');
+              const connDot = document.getElementById('connStatusDot');
+              if (connText && connDot) {
+                connText.textContent = 'Reconnecting...';
+                connDot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500';
+              }
+            });
+
+            mqttClient.on('message', (topic, payload) => {
+              try {
+                const data = JSON.parse(payload.toString());
+                handleIncomingNetworkEvent(data);
+              } catch(e) {}
+            });
+
+            mqttClient.on('offline', () => {
+              // Gracefully handle network transitions
+            });
+          } catch(err) {
+            console.warn('Realtime network fallback', err);
+          }
+        }
+
+        // 3. Periodic presence heartbeat (every 10s) and prune stale users
+        if (presenceHeartbeatInterval) clearInterval(presenceHeartbeatInterval);
+        presenceHeartbeatInterval = setInterval(() => {
+          if (currentUser) {
+            sendNetworkEvent({ type: 'user_ping', user: currentUser });
+          }
+
+          // Prune users who haven't pinged in 35 seconds
+          const now = Date.now();
+          let changed = false;
+          Object.keys(knownUsers).forEach(uid => {
+            if (currentUser && uid !== currentUser.id) {
+              const u = knownUsers[uid];
+              if (u.lastSeen && now - u.lastSeen > 35000) {
+                delete knownUsers[uid];
+                changed = true;
+              }
+            }
+          });
+          if (changed) {
+            renderOnlineUsersList();
+          }
+        }, 10000);
+      }
+
+      window.addEventListener('beforeunload', () => {
+        if (currentUser) {
+          sendNetworkEvent({ type: 'user_leave', userId: currentUser.id });
+        }
+      });
 
       // Check Session on Start
       if (!currentUser) {
@@ -1990,6 +2141,7 @@
         updateAdminUiState();
         showLobby();
       }
+      initRealtimeNetworking();
     });
   </script>
 </body>
